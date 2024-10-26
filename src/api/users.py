@@ -27,9 +27,8 @@ def user_signup(new_user : user):
     with db.engine.begin() as connection:
         try:
             connection.execute(sqlalchemy.text(sql_to_execute), {"username":new_user.username})
-        except sqlalchemy.exc.IntegrityError as e:
+        except sqlalchemy.exc.IntegrityError:
             raise HTTPException(status_code=400, detail="Bad Request User Already Exists")
-
     return {
         "success":True
     }
