@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from src.api import auth
+from pydantic import BaseModel
 import sqlalchemy
 from src import database as db
 
@@ -9,8 +10,21 @@ router = APIRouter(
     dependencies=[Depends(auth.get_api_key)],
 )
 
+class Movie(BaseModel):
+    name: str
+    release_year: int
+    genres: list[str]
+    average_rating: int
+    budget: int
+    box_office: int
+    demographic: list[str]
+
+
 @router.get("/{movie_id}")
 def get_movie(movie_id : int):
+    """
+    Return movie information for a given movie_id
+    """
     movie = {}
     result = None
     with db.engine.begin() as connection:
@@ -28,8 +42,33 @@ def get_movie(movie_id : int):
     return movie
 
 @router.post("/new/")
-def new_movie():
-    return NotImplemented
+def new_movie(new_movie : Movie):
+    """
+    Create a new entry for a movie
+    """
+    movie_id = 0
+    with db.engine.begin() as connection:
+        sql_to_execute = """
+                            INSERT INTO movies (name, release_year, genres, average_rating, budget, box_office, demographic)
+                            VALUES (:name, :release_year, :genres, :average_rating, :budget, :box_office, :demographic)
+                            RETURNING id
+                        """
+        values = {
+            "name":new_movie.name,
+            "release_year":new_movie.release_year,
+            "genres":new_movie.genres,
+            "average_rating":new_movie.average_rating,
+            "budget":new_movie.budget,
+            "box_office":new_movie.box_office,
+            "demographic":new_movie.demographic
+        }
+        try:
+            movie_id = connection.execute(sqlalchemy.text(sql_to_execute), values).scalar()
+        except sqlalchemy.exc.IntegrityError:
+            raise HTTPException(status_code=400, detail="Bad Request Movie Already Exists")
+    return {
+        "movie_id":movie_id
+    }
 
 @router.get("/available")
 def get_movie_available():
