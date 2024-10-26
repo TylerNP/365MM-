@@ -10,11 +10,12 @@ Obtain movie information. <br />
 {
   "movie_id": "integer",
   "name": "string",
-  "director": "string",
-  "actors": ["string"], /*List of actors in major roles*/
   "release_year": "integer",
   "genres": ["string"],  /*genres list size is capped at 6*/ 
-  "average_rating": "integer"
+  "average_rating": "integer",
+  "budget": "integer",
+  "box_office": "integer",
+  "demographic": ["string"]
 }
 ```
 
@@ -27,11 +28,12 @@ Creates a new movie entry <br />
 {
   "movie_id": "integer",
   "name": "string",
-  "director": "string",
-  "actors": ["string"], /*List of actors in major roles*/
   "release_year": "integer",
   "genres": ["string"],  /*genres list size is capped at 6*/ 
-  "average_rating": "integer"
+  "average_rating": "integer",
+  "budget": "integer",
+  "box_office": "integer",
+  "demographic": ["string"]
 }
 ```
 
@@ -61,11 +63,12 @@ Gives a list of movies that are available with a certain subscription services o
   {
     "movie_id": "integer",
     "name": "string",
-    "director": "string",
-    "actors": ["string"], /*List of actors in major roles*/
     "release_year": "integer",
     "genres": ["string"],  /*genres list size is capped at 6*/ 
-    "average_rating": "integer"
+    "average_rating": "integer",
+    "budget": "integer",
+    "box_office": "integer",
+    "demographic": ["string"]
   }
 ]
 ```
@@ -80,10 +83,12 @@ Get movies you haven't watched yet but have shown intrest in <br />
   {
     "movie_id": "integer",
     "name": "string",
-    "director": "string",
     "release_year": "integer",
     "genres": ["string"],  /*genres list size is capped at 6*/ 
-    "average_rating": "integer"
+    "average_rating": "integer",
+    "budget": "integer",
+    "box_office": "integer",
+    "demographic": ["string"]
   }
 ]
 ```
@@ -96,15 +101,14 @@ Create new user. <br />
 
 ```json
 {
-  "username": "string",
-  "password": "string" 
+  "username": "string"
 }
 ```
 **Response**:
 
 ```json
 {
-  "user_id": "integer"
+  "success": "boolean"
 }
 ```
 
@@ -115,8 +119,7 @@ Login existing user. <br />
 
 ```json
 {
-  "username": "string",
-  "password": "string"
+  "username": "string"
 }
 ```
 **Response**:
@@ -137,11 +140,12 @@ Retrieves user's list of movies <br />
   {
     "movie_id": "integer",
     "name": "string",
-    "director": "string",
-    "actors": ["string"], /*List of actors in major roles*/
     "release_year": "integer",
     "genres": ["string"],  /*genres list size is capped at 6*/ 
-    "average_rating": "integer"
+    "average_rating": "integer",
+    "budget": "integer",
+    "box_office": "integer",
+    "demographic": ["string"]
   }
 ]
 ```
@@ -193,11 +197,12 @@ Retrieves the catalog of movies. Each movie will only have one unique entry. <br
   {
     "movie_id": "integer",
     "name": "string",
-    "director": "string",
-    "actors": ["string"], /*List of actors in major roles*/
     "release_year": "integer",
     "genres": ["string"],  /*genres list size is capped at 6*/ 
-    "average_rating": "integer"
+    "average_rating": "integer",
+    "budget": "integer",
+    "box_office": "integer",
+    "demographic": ["string"]
   }
 ]
 ```
@@ -241,11 +246,12 @@ Creates a reocmmendation list based off user prefences (likes/dislikes) <br />
   {
     "movie_id": "integer",
     "name": "string",
-    "director": "string",
-    "actors": ["string"], /*List of actors in major roles*/
     "release_year": "integer",
     "genres": ["string"],  /*genres list size is capped at 6*/ 
-    "average_rating": "integer"
+    "average_rating": "integer",
+    "budget": "integer",
+    "box_office": "integer",
+    "demographic": ["string"]
   }
 ]
 ```
@@ -281,11 +287,12 @@ Finds more movies to recommend to a user <br />
   {
     "movie_id": "integer",
     "name": "string",
-    "director": "string",
-    "actors": ["string"], /*List of actors in major roles*/
     "release_year": "integer",
     "genres": ["string"],  /*genres list size is capped at 6*/ 
-    "average_rating": "integer"
+    "average_rating": "integer",
+    "budget": "integer",
+    "box_office": "integer",
+    "demographic": ["string"]
   }
 ]
 ```
@@ -309,11 +316,12 @@ Provides a list of movies that both an actor and director have worked on togethe
   {
     "movie_id": "integer",
     "name": "string",
-    "director": "string",
-    "actors": ["string"], /*List of actors in major roles*/
     "release_year": "integer",
     "genres": ["string"],  /*genres list size is capped at 6*/ 
-    "average_rating": "integer"
+    "average_rating": "integer",
+    "budget": "integer",
+    "box_office": "integer",
+    "demographic": ["string"]
   }
 ]
 ```
@@ -329,14 +337,12 @@ Get the performance data of a movie <br />
   {
     "movie_id": "integer",
     "name": "string",
-    "director": "string",
-    "actors": ["string"], /*List of actors in major roles*/
     "release_year": "integer",
-    "genres": ["string"],  
+    "genres": ["string"],  /*genres list size is capped at 6*/ 
     "average_rating": "integer",
     "budget": "integer",
-    "box-office": "integer",
-    "demographic": "string"
+    "box_office": "integer",
+    "demographic": ["string"]
   }
 ]
 ```
@@ -351,14 +357,12 @@ Based on genre, provides a list of movies that are doing well and what their bud
   {
     "movie_id": "integer",
     "name": "string",
-    "director": "string",
-    "actors": ["string"], /*List of actors in major roles*/
     "release_year": "integer",
-    "genres": ["string"],  
+    "genres": ["string"],  /*genres list size is capped at 6*/ 
     "average_rating": "integer",
     "budget": "integer",
-    "box-office": "integer",
-    "demographic": "string"
+    "box_office": "integer",
+    "demographic": ["string"]
   }
 ]
 ```
@@ -373,14 +377,12 @@ Provides a list of the highest performing movies with respect to user reviews an
   {
     "movie_id": "integer",
     "name": "string",
-    "director": "string",
-    "actors": ["string"], /*List of actors in major roles*/
     "release_year": "integer",
-    "genres": ["string"],  
+    "genres": ["string"],  /*genres list size is capped at 6*/ 
     "average_rating": "integer",
     "budget": "integer",
-    "box-office": "integer",
-    "demographic": "string"
+    "box_office": "integer",
+    "demographic": ["string"]
   }
 ]
 ```
