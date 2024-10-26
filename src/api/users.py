@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from src.api import auth
 import sqlalchemy
@@ -26,7 +26,7 @@ def user_signup(new_user : user):
         try:
             connection.execute(sqlalchemy.text(sql_to_execute), {"username":new_user.username})
         except sqlalchemy.exc.IntegrityError as e:
-            response = "Bad Request"
+            raise HTTPException(status_code=400, detail="Bad Request")
 
     # IF SO, ADDED TO DB
     return response
