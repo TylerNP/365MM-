@@ -1,15 +1,15 @@
 from fastapi import FastAPI, exceptions
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
-from src.api import groups, catalog, analytics, admin, movies, predictions, recommendations
+from src.api import users, groups, catalog, analytics, admin, movies, predictions, recommendations
 import json
 import logging
 import sys
 from starlette.middleware.cors import CORSMiddleware
 
 description = """
-365MM is the premier movie database for all your movies desires.
-"""
+                365MM is the premier movie database for all your movies desires.
+            """
 
 app = FastAPI(
     title="365MM",
@@ -23,16 +23,17 @@ app = FastAPI(
 )
 
 # ? when deploying put app domain here
-# origins = ["https://potion-exchange.vercel.app"]
+#origins = ["https://potion-exchange.vercel.app"]
 
 app.add_middleware(
     CORSMiddleware,
-    # allow_origins=origins,
+    #allow_origins=origins,
     allow_credentials=True,
     allow_methods=["GET", "OPTIONS"],
     allow_headers=["*"],
 )
 
+app.include_router(users.router)
 # app.include_router(catalog.router)
 # app.include_router(groups.router)
 # app.include_router(catalog.router)

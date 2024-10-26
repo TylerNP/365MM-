@@ -10,8 +10,11 @@ router = APIRouter(
     dependencies=[Depends(auth.get_api_key)],
 )
 
+class user(BaseModel):
+    username: str
+
 @router.post("/signup")
-def user_signup(username : str):
+def user_signup(new_user : user):
     # CHECK IF NAME IS UNIQUE
     # USE UNIQUENESS CONSTRAINT
     sql_to_execute = """
@@ -20,28 +23,27 @@ def user_signup(username : str):
                     """
     with db.engine.begin() as connection:
         try:
-            connection.execute(sqlalchemy.text(sql_to_execute), {"username":username})
+            connection.execute(sqlalchemy.text(sql_to_execute), {"username":new_user.username})
         except:
-            return None
+            return "BAD"
 
     # IF SO, ADDED TO DB
-    return "success"
-
+    return "OK"
 
 def user_login():
     with db.engine.begin() as connection:
-        'SELECT username FROM users WHERE username = '
-        return NotImplemented
+        set = 'SELECT username FROM users WHERE username = '
+        return "ok"
 
 
 def user_list():
-    return NotImplemented
+    return "ok"
 
 
 def user_rate_movie():
-    return NotImplemented
+    return "ok"
 
 
 def user_watched_movie():
-    return NotImplemented
+    return "ok"
 
