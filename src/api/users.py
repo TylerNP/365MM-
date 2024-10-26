@@ -15,9 +15,11 @@ class user(BaseModel):
 
 @router.post("/signup")
 def user_signup(new_user : user):
-    # CHECK IF NAME IS UNIQUE
-    # USE UNIQUENESS CONSTRAINT
-    response = "OK"
+    """
+    Create a new user with a given username
+    Rejects duplicate usernames
+    """
+    # USE UNIQUENESS CONSTRAINT With Try Block TO Detect Bad Inputs
     sql_to_execute = """
                         INSERT INTO users (username)
                         VALUES (:username)
@@ -25,11 +27,11 @@ def user_signup(new_user : user):
     with db.engine.begin() as connection:
         try:
             connection.execute(sqlalchemy.text(sql_to_execute), {"username":new_user.username})
-        except sqlalchemy.exc.IntegrityError as e:
-            raise HTTPException(status_code=400, detail="Bad Request")
-
-    # IF SO, ADDED TO DB
-    return response
+        except sqlalchemy.exc.IntegrityError:
+            raise HTTPException(status_code=400, detail="Bad Request User Already Exists")
+    return {
+        "success":True
+    }
 
 def user_login():
     with db.engine.begin() as connection:
