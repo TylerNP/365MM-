@@ -45,7 +45,7 @@ def user_login(username : str):
             user_id = connection.execute(sqlalchemy.text(set), {"username":username}).scalar_one()
         except sqlalchemy.exc.IntegrityError:
             print("No User Exists With Given Username")
-            return {}
+            return {"user_id": -1}
     return {
         "user_id":user_id
     }
@@ -70,6 +70,7 @@ def user_rate_movie(user_id : int, movie_id : int, rating : int):
         try:
             connection.execute(sqlalchemy.text(sql_to_execute), {"user_id":user_id, "movie_id":movie_id, "rating":rating})
         except sqlalchemy.exc.IntegrityError:
+            # ? To-Do Update query instead
             print("Already Rated Movie")
     return {
         "success":True
