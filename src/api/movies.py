@@ -59,7 +59,8 @@ def new_movie(new_movie : Movie):
         try:
             movie_id = connection.execute(sqlalchemy.text(sql_to_execute), values).scalar()
         except sqlalchemy.exc.IntegrityError:
-            raise HTTPException(status_code=400, detail="Bad Request Movie Already Exists")
+            print("Movie Already Exists")
+            return {}
     return {
         "movie_id":movie_id
     }
