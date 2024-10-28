@@ -168,7 +168,7 @@ Rate a movie. <br />
 }
 ```
 
-### 2.5 Watched Movie - `/users/{user_id}/watched/{movie_id}` (POST)
+### 2.5 Watched Movie - `/users/{user_id}/watch/{movie_id}` (POST)
 Log a movie as watched or not. <br />
 
 **Request**:
