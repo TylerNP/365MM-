@@ -9,8 +9,8 @@ Rakesh then enjoys the rest of his day by watching the new movie
 
 1. `/users/login`
 **Request**
-curl -X 'PUT' \
-  'https://three65mm.onrender.com/users/login/{user_id}?username=Rakesh' \
+curl -X 'GET' \
+  'https://three65mm.onrender.com/users/login?username=Rakesh' \
   -H 'accept: application/json' 
 
 **Response**
