@@ -12,7 +12,7 @@ router = APIRouter(
 
 class Movie(BaseModel):
     name: str
-    release_year: int
+    release_date: int
     genres: list[str]
     average_rating: int
     budget: int
@@ -28,7 +28,7 @@ def get_movie(movie_id : int):
     movie = {}
     result = None
     with db.engine.begin() as connection:
-        sql_to_execute = "SELECT name, release_year, genres, average_rating, budget, box_office, demographic FROM movies WHERE id = :movie_id"
+        sql_to_execute = "SELECT name, release_date, genres, average_rating, budget, box_office, demographic FROM movies WHERE id = :movie_id"
         result = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
         movie = format_movie(result, movie_id)
     print(movie)
@@ -43,13 +43,13 @@ def new_movie(new_movie : Movie):
     movie_id = 0
     with db.engine.begin() as connection:
         sql_to_execute = """
-                            INSERT INTO movies (name, release_year, genres, average_rating, budget, box_office, demographic)
-                            VALUES (:name, :release_year, :genres, :average_rating, :budget, :box_office, :demographic)
+                            INSERT INTO movies (name, release_date, genres, average_rating, budget, box_office, demographic)
+                            VALUES (:name, :release_date, :genres, :average_rating, :budget, :box_office, :demographic)
                             RETURNING id
                         """
         values = {
             "name":new_movie.name,
-            "release_year":new_movie.release_year,
+            "release_date":new_movie.release_date,
             "genres":new_movie.genres,
             "average_rating":new_movie.average_rating,
             "budget":new_movie.budget,
@@ -80,7 +80,7 @@ def get_movie_interested(user_id : int):
                             SELECT 
                                 movies.id, 
                                 movies.name, 
-                                movies.release_year,
+                                movies.release_date,
                                 movies.genres,
                                 movies.average_rating,
                                 movies.budget,
@@ -112,7 +112,7 @@ def format_movie(movie_result : object, movie_id : int) -> dict[str, any]:
     for info in movie_result:
         movie["movie_id"] = movie_id
         movie["name"] = info.name
-        movie["release_year"] = info.release_year
+        movie["release_date"] = info.release_date
         movie["genres"] = info.genres
         movie["average_rating"] = info.average_rating
         movie["budget"] = info.budget
