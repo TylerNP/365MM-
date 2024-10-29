@@ -1,5 +1,6 @@
 import csv 
 import ast
+import parameter
 from datetime import datetime
 
 """
@@ -16,13 +17,13 @@ def format_date(string_date : str) -> datetime:
         date = datetime.strptime(string_date_timestamp, format_date)
     return date
 
-path = r"C:\Users\123Ra\OneDrive\Documents\GitHub\365MM-\populate_data\archive\movies_metadata.csv"
+
 
 max_read = float('inf')
 movies = []
 missing = 0
 
-with open(path, "r", encoding='utf-8') as file:
+with open(parameter.path, "r", encoding='utf-8') as file:
     csv_reader = csv.reader(file) 
     headers = next(csv_reader)
     header_indices = {header: index for index, header in enumerate(headers)}
@@ -47,11 +48,11 @@ with open(path, "r", encoding='utf-8') as file:
             print(f"{i} is missing data or malformed")
         movies.append(movie)
 
-write_path = r"C:\Users\123Ra\OneDrive\Documents\GitHub\365MM-\populate_data\data.csv"
+
 print(f"{missing} rows removed")
 
 header = ["name", "release_date", "genres", "average_rating", "budget", "box_office", "demographic"]
-with open(write_path, "w", newline='', encoding='utf-8') as file:
+with open(parameter.write_path, "w", newline='', encoding='utf-8') as file:
     writer = csv.DictWriter(file, fieldnames=header)
     writer.writeheader()
     writer.writerows(movies)
