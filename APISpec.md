@@ -112,7 +112,7 @@ Create new user. <br />
 }
 ```
 
-### 2.2 User Login - `/users/login/{user_id}` (PUT)
+### 2.2 User Login - `/users/login/` (GET)
 Login existing user. <br />
 
 **Request**:
