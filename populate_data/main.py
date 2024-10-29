@@ -1,64 +1,57 @@
 import csv 
-import os
-import os.path
-import StringIO
+import ast
+from datetime import datetime
 
-path = '/Users/taran/Downloads/archive/movies_metadata.csv'
+"""
+# Data Obtained From Kaggle Movie Dataset
+# https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?resource=download
+"""
+def format_date(string_date : str) -> datetime:
+    format_date = "%Y-%m-%d %H:%M:%S"
+    date = None
+    try:
+        date = datetime.strptime(string_date, format_date)
+    except :
+        string_date_timestamp = string_date +  " 00:00:00"
+        date = datetime.strptime(string_date_timestamp, format_date)
+    return date
 
+path = r"C:\Users\123Ra\OneDrive\Documents\GitHub\365MM-\populate_data\archive\movies_metadata.csv"
+
+max_read = float('inf')
 movies = []
-with open(path, "r") as file:
+missing = 0
+
+with open(path, "r", encoding='utf-8') as file:
     csv_reader = csv.reader(file) 
+    headers = next(csv_reader)
+    header_indices = {header: index for index, header in enumerate(headers)}
     for i, row in enumerate(csv_reader):
-        movie = []
-        if i == 1:
-            movie.append(row[20]) # Name was 8
-            movie.append(row[14]) # Date
-            movie.append(row[3]) # Genres
-            movie.append(0) # avg rating
-            movie.append(row[2]) # Budget
-            movie.append(row[15]) # Box office
-            movie.append([])
-            # for e in row:
-            #     print(e)
-            # Movie
-            # movies.append()
+        if i > max_read:
             break
+        movie = {}
+        try:
+            movie["name"] = row[header_indices["title"]] 
+            movie["release_date"] = format_date(row[header_indices["release_date"]])
+            genres = []
+            genre_info = ast.literal_eval(row[header_indices["genres"]])
+            for genre in genre_info:
+                genres.append(genre["name"])
+            movie["genres"] = genres
+            movie["average_rating"] = 0 #Default Value
+            movie["budget"] = row[header_indices["budget"]] 
+            movie["box_office"] = row[header_indices["revenue"]] 
+            movie["demographic"] = [] # Default
+        except:
+            missing = missing + 1
+            print(f"{i} is missing data or malformed")
+        movies.append(movie)
 
+write_path = r"C:\Users\123Ra\OneDrive\Documents\GitHub\365MM-\populate_data\data.csv"
+print(f"{missing} rows removed")
 
-with open("/Users/taran/CSC365/365MM-/populate_data/main.py", "w") as file:
-    writer = csv.writer(file)
+header = ["name", "release_date", "genres", "average_rating", "budget", "box_office", "demographic"]
+with open(write_path, "w", newline='', encoding='utf-8') as file:
+    writer = csv.DictWriter(file, fieldnames=header)
+    writer.writeheader()
     writer.writerows(movies)
-
-
-class Movie():
-    name: str
-    release_year: int
-    genres: list[str]
-    average_rating: int
-    budget: int
-    box_office: int
-    demographic: list[str]
-
-
-
-"""
-
-with open(path, "r") as file:
-    csv_reader = csv.reader(file) 
-    for i, row in enumerate(csv_reader):
-        movie = []
-        if i == 1:
-            print(row[20]) # Name was 8
-            print(row[14]) # Date
-            print(row[3]) # Genres
-            print(0) # avg rating
-            print(row[2]) # Budget
-            print(row[15]) # Box office
-            print([])
-            # for e in row:
-            #     print(e)
-            # Movie
-            # movies.append()
-            break
-            
-"""
