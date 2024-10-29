@@ -76,7 +76,7 @@ def get_movie_interested(user_id : int):
     """
     movie = {}
     with db.engine.begin() as connection:
-        sql_to_execute = "SELECT user.id FROM users WHERE user.id = :user_id"
+        sql_to_execute = "SELECT users.id FROM users WHERE users.id = :user_id"
         exsits = list(connection.execute(sqlalchemy.text(sql_to_execute), {"user_id": user_id}))
         if len(exsits) == 0:
             return movie
