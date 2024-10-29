@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from src.api import auth
+#from src.api import auth
 import sqlalchemy
 from src import database as db
 
 router = APIRouter(
     prefix = "/users",
     tags = ["users"],
-    dependencies=[Depends(auth.get_api_key)],
+    #dependencies=[Depends(auth.get_api_key)],
 )
 
 class user(BaseModel):

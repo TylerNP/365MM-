@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from src.api import auth
+#from src.api import auth
 from pydantic import BaseModel
 import sqlalchemy
 from src import database as db
@@ -7,7 +7,7 @@ from src import database as db
 router = APIRouter(
     prefix = "/movies",
     tags = ["movies"],
-    dependencies=[Depends(auth.get_api_key)],
+    #dependencies=[Depends(auth.get_api_key)],
 )
 
 class Movie(BaseModel):

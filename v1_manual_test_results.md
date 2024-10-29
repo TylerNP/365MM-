@@ -7,14 +7,11 @@ Rakesh then enjoys the rest of his day by watching the new movie
 
 # Testing Results
 
-### Note API_KEY is substituted with the actual API_Key
-
 1. `/users/login`
 **Request**
 curl -X 'PUT' \
   'https://three65mm.onrender.com/users/login/{user_id}?username=Rakesh' \
-  -H 'accept: application/json' \
-  -H 'access_token: API_KEY'
+  -H 'accept: application/json' 
 
 **Response**
 {
@@ -24,8 +21,7 @@ curl -X 'PUT' \
 **Request**
 curl -X 'GET' \
   'https://three65mm.onrender.com/movies/user/23' \
-  -H 'accept: application/json' \
-  -H 'access_token: API_KEY'
+  -H 'accept: application/json' 
 
 **Response**
 {
