@@ -9,7 +9,8 @@ create table
     box_office bigint null,
     demographic text null,
     release_date timestamp with time zone null,
-    constraint movies_pkey primary key (id)
+    constraint movies_pkey primary key (id),
+    constraint unique_name_release_date_genres unique (name, release_date, genres)
   ) tablespace pg_default;
 
 create table
