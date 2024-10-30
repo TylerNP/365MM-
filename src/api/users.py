@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from src.api import auth
+#from src.api import auth
 import sqlalchemy
 from src import database as db
 
 router = APIRouter(
     prefix = "/users",
     tags = ["users"],
-    dependencies=[Depends(auth.get_api_key)],
+    #dependencies=[Depends(auth.get_api_key)],
 )
 
 class user(BaseModel):
@@ -36,16 +36,15 @@ def user_signup(new_user : user):
         "success":True
     }
 
-@router.put("/login/{user_id}")
+@router.get("/login")
 def user_login(username : str):
     user_id = 0
     with db.engine.begin() as connection:
         set = 'SELECT users.id FROM users WHERE users.username = :username'
         try:
             user_id = connection.execute(sqlalchemy.text(set), {"username":username}).scalar_one()
-        except sqlalchemy.exc.IntegrityError:
-            print("No User Exists With Given Username")
-            return {"user_id": -1}
+        except:
+            raise HTTPException(status_code=404, detail="No User Found")
     return {
         "user_id":user_id
     }

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from src.api import auth
+#from src.api import auth
 from pydantic import BaseModel
 import sqlalchemy
 from src import database as db
@@ -7,7 +7,7 @@ from src import database as db
 router = APIRouter(
     prefix = "/movies",
     tags = ["movies"],
-    dependencies=[Depends(auth.get_api_key)],
+    #dependencies=[Depends(auth.get_api_key)],
 )
 
 class Movie(BaseModel):
@@ -76,7 +76,7 @@ def get_movie_interested(user_id : int):
     """
     movie = {}
     with db.engine.begin() as connection:
-        sql_to_execute = "SELECT user.id FROM users WHERE user.id = :user_id"
+        sql_to_execute = "SELECT users.id FROM users WHERE users.id = :user_id"
         exsits = list(connection.execute(sqlalchemy.text(sql_to_execute), {"user_id": user_id}))
         if len(exsits) == 0:
             return movie
