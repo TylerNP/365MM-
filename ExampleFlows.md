@@ -2,13 +2,14 @@
 
 #### ALREADY WATCHED A MOVIE
 ##### Already watched from recommended movies
+
+###### Taran
 Rupinder Singh logs in by making a POST request to `/users/login`. Rupinder then gets recommended a movie he as already watched, "Rupinder Gandhi 2: The Robinhood". He decideds to rate the movie a 10 out of 10 with a POST request to `/users/{id}/list/{movie_id}/rate` and then makes a POST request to `/movies/{id}/list/{movie_id}/` with that movie's id in the request URL. 
 
 Rupinder starts by calling POST `/users/login` to log in.
 Then Rupinder calls GET `/recommend/{user_id}` to get his recommended movies
 Rupinder calls POST `/users/{id}/list/{movie_id}/rate`  with the movie he has already seen.
 Finally, he then makes call to POST `/users/{id}/list/{movie_id}/watched`, where the movie_id is the id of the movie he has seen"
-
 
 #### GET A MOVIE TO WATCH TODAY
 Rakesh had a long day and wants to watch a movie. He is too tired to think of a movie. Rakesh first logs in by making a POST request to `/users/login`. He then makes a GET request to `/movies/user/{user_id}/` which returns a movie that he has not already watched, but has shown intrest in from past recomendations. Rakesh then deciedes to watch that movie. 
@@ -18,6 +19,7 @@ He then makes a GET request to `/movies/user/{user_id}/` where he is given a mov
 Rakesh then enjoys the rest of his day by watching the new movie
 
 ##### Already watched from watching a movie
+###### Taran (movie not found if not there) (search by title and genre or or them)
 John Smith just watched a new movie in the theatres. He really enjoyed this movie and would like to see similar movies. He goes on (our project) and searches for the movie he just watched. He adds it to his list of liked movies and rates it from 1-10. John then requests to see movies like the one he just likes and rated.
 
 John starts by logging into or signing up for an account 
