@@ -41,3 +41,29 @@ def generate_recommendation_collab():
         -> Find Similar Users that Already Rated a Movie
         -> Use this to Score Movies to Reocmmend 
 """
+
+"""
+    Recommendation Engine (Content-Based)
+    - Potential Vector Weights
+        - Genres
+        - Avg Ratings on Movie
+        - Avg Likes
+        #- Number of Views
+
+"""
+
+class PreferanceVector:
+    genre = ""
+    avg_ratings = 0
+    avg_likes = 0
+    def __init__ (self, g : str, r : int, l: int) -> None:
+        self.genre = g
+        self.avg_ratings = r
+        self.avg_likes = l
+    
+
+if __name__ == "__main__":
+    user = PreferanceVector("Animation", 7, 9)
+    movie = PreferanceVector("Animation", 3, 1)
+    print(user)
+    print("RAN")
