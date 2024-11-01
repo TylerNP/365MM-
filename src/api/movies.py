@@ -15,10 +15,11 @@ class Movie(BaseModel):
     name: str
     release_date: datetime
     genres: list[str]
+    duration: int
     average_rating: int
     budget: int
     box_office: int
-    demographic: list[str]
+    language: list[str]
     description: str
 
 
@@ -30,7 +31,7 @@ def get_movie(movie_id : int):
     movie = {}
     result = None
     with db.engine.begin() as connection:
-        sql_to_execute = "SELECT name, release_date, description, average_rating, budget, box_office, demographic FROM movies WHERE id = :movie_id"
+        sql_to_execute = "SELECT name, release_date, description, average_rating, budget, box_office, duration FROM movies WHERE id = :movie_id"
         result = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
         movie = format_movie(result, movie_id)
     print(movie)
@@ -45,8 +46,8 @@ def new_movie(new_movie : Movie):
     movie_id = 0
     with db.engine.begin() as connection:
         sql_to_execute = """
-                            INSERT INTO movies (name, release_date, description, average_rating, budget, box_office, demographic)
-                            VALUES (:name, :release_date, :description, :average_rating, :budget, :box_office, :demographic)
+                            INSERT INTO movies (name, release_date, description, duration, average_rating, budget, box_office)
+                            VALUES (:name, :release_date, :description, :duration, :average_rating, :budget, :box_office)
                             RETURNING id
                         """
         values = {
@@ -56,7 +57,7 @@ def new_movie(new_movie : Movie):
             "average_rating":new_movie.average_rating,
             "budget":new_movie.budget,
             "box_office":new_movie.box_office,
-            "demographic":new_movie.demographic
+            "duration":new_movie.duration
         }
         try:
             movie_id = connection.execute(sqlalchemy.text(sql_to_execute), values).scalar()
@@ -70,6 +71,8 @@ def new_movie(new_movie : Movie):
                 genre_ids.append(genre_id[str(new)])
             sql_to_execute = "INSERT INTO movie_genres (movie_id, genre_id) VALUES (:movie_id, UNNEST(:genre_ids))"
             connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id, "genre_ids":genre_ids})
+            sql_to_execute = "INSERT INTO movie_languages (movie_id, language) VALUES (:movie_id, UNNEST(:languages))"
+            connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id, "languages":new_movie.language})
         except KeyError:
             print("No Such Genre Exists")
             return ()
@@ -104,7 +107,7 @@ def get_movie_interested(user_id : int):
                                 movies.average_rating,
                                 movies.budget,
                                 movies.box_office, 
-                                movies.demographic 
+                                movies.duration 
                             FROM 
                                 movies
                             WHERE NOT EXISTS (
@@ -136,5 +139,4 @@ def format_movie(movie_result : object, movie_id : int) -> dict[str, any]:
         movie["average_rating"] = info.average_rating
         movie["budget"] = info.budget
         movie["box_office"] = info.box_office
-        movie["demographic"] = info.demographic
     return movie
