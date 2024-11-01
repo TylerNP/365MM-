@@ -43,7 +43,7 @@ def user_login(username : str):
         set = 'SELECT users.id FROM users WHERE users.username = :username'
         try:
             user_id = connection.execute(sqlalchemy.text(set), {"username":username}).scalar_one()
-        except:
+        except sqlalchemy.exc.NoResultFound:
             raise HTTPException(status_code=404, detail="No User Found")
     return {
         "user_id":user_id

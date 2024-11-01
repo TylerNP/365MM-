@@ -334,37 +334,36 @@ Get the performance data of a movie <br />
 **Response**:
 
 ```json
-[
-  {
-    "viewed": "integer",
-    "rated": "integer",
-    "liked": "integer"
-  }
-]
+{
+  "viewed": "integer",
+  "rated": "integer",
+  "average_rating": "integer",
+  "liked": "integer",
+  "disliked": "integer"
+}
 ```
 
 ### 5.2 Get Analytics Genre - `/analytics/{genre}` (GET)
-Based on genre, provides a list of movies that are doing well and what their budget - earnings are, audience rating, critic rating and demographic <br />
+Based on genre provide average movie performance<br />
 
 **Response**:
 
 ```json
-[
-  {
-    "movie_id": "integer",
-    "name": "string",
-    "release_year": "integer",
-    "genres": ["string"],  /*genres list size is capped at 6*/ 
-    "average_rating": "integer",
-    "budget": "integer",
-    "box_office": "integer",
-    "demographic": ["string"]
-  }
-]
+{
+  "average_views": "integer",
+  "average_rating": "integer",
+  "average_likes": "integer",
+  "average_dislikes": "integer",
+  "most_views": "integer",
+  "highest_rating": "integer",
+  "least_views": "integer",
+  "lowest_rating": "integer",
+  "movie_ids": ["integer"] /* movie for most_views, highest_rating, least_views, and lowest_views in this order */
+}
 ```
 
 ## 5.3 Get Analytics Popular - `/analytics/popular/` (GET)
-Provides a list of the highest performing movies with respect to user reviews and box-office performance <br />
+Provides a list of the performance of the top 5 of each most rated,most viewed, and most liked movies <br />
 
 **Response**:
 
@@ -372,13 +371,9 @@ Provides a list of the highest performing movies with respect to user reviews an
 [
   {
     "movie_id": "integer",
-    "name": "string",
-    "release_year": "integer",
-    "genres": ["string"],  /*genres list size is capped at 6*/ 
-    "average_rating": "integer",
-    "budget": "integer",
-    "box_office": "integer",
-    "demographic": ["string"]
+    "viewed": "integer",
+    "rated": "integer",
+    "liked": "integer",
   }
 ]
 ```
