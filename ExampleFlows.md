@@ -7,7 +7,7 @@
 Rupinder Singh logs in by making a POST request to `/users/login`. Rupinder then gets recommended a movie he as already watched, "Rupinder Gandhi 2: The Robinhood". He decideds to rate the movie a 10 out of 10 with a POST request to `/users/{id}/list/{movie_id}/rate` and then makes a POST request to `/movies/{id}/list/{movie_id}/` with that movie's id in the request URL. 
 
 Rupinder starts by calling POST `/users/login` to log in.
-Then Rupinder calls GET `/recommend/{user_id}` to get his recommended movies
+Then Rupinder calls GET `/recommendations/{user_id}` to get his recommended movies
 Rupinder calls POST `/users/{id}/list/{movie_id}/rate`  with the movie he has already seen.
 Finally, he then makes call to POST `/users/{id}/list/{movie_id}/watched`, where the movie_id is the id of the movie he has seen"
 

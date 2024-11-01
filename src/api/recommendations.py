@@ -10,8 +10,8 @@ router = APIRouter(
 )
 
 @router.get("/{user_id}")
-def get_recommended():
-    return NotImplemented
+def get_recommended(user_id: int):
+    pass
 
 @router.post("/{user_id}/reset/")
 def reset_recommended():
