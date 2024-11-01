@@ -7,7 +7,6 @@ from src import database as db
 router = APIRouter(
     prefix = "/recommendations",
     tags = ["recommendations"],
-    dependencies=[Depends(auth.get_api_key)],
 )
 
 @router.get("/{user_id}")

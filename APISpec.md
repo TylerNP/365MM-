@@ -11,7 +11,7 @@ Obtain movie information. <br />
   "movie_id": "integer",
   "name": "string",
   "release_year": "integer",
-  "genres": ["string"],  /*genres list size is capped at 6*/ 
+  "description": "str", 
   "average_rating": "integer",
   "budget": "integer",
   "box_office": "integer",
@@ -29,11 +29,12 @@ Creates a new movie entry <br />
   "movie_id": "integer",
   "name": "string",
   "release_year": "integer",
-  "genres": ["string"],  /*genres list size is capped at 6*/ 
+  "description": "str", 
   "average_rating": "integer",
   "budget": "integer",
   "box_office": "integer",
-  "demographic": ["string"]
+  "demographic": ["string"],
+  "genres": ["string"] 
 }
 ```
 
@@ -64,7 +65,7 @@ Gives a list of movies that are available with a certain subscription services o
     "movie_id": "integer",
     "name": "string",
     "release_year": "integer",
-    "genres": ["string"],  /*genres list size is capped at 6*/ 
+    "description": "str", 
     "average_rating": "integer",
     "budget": "integer",
     "box_office": "integer",
@@ -84,7 +85,7 @@ Get movies you haven't watched yet but have shown intrest in <br />
     "movie_id": "integer",
     "name": "string",
     "release_year": "integer",
-    "genres": ["string"],  /*genres list size is capped at 6*/ 
+    "description": "str", 
     "average_rating": "integer",
     "budget": "integer",
     "box_office": "integer",
@@ -335,14 +336,9 @@ Get the performance data of a movie <br />
 ```json
 [
   {
-    "movie_id": "integer",
-    "name": "string",
-    "release_year": "integer",
-    "genres": ["string"],  /*genres list size is capped at 6*/ 
-    "average_rating": "integer",
-    "budget": "integer",
-    "box_office": "integer",
-    "demographic": ["string"]
+    "viewed": "integer",
+    "rated": "integer",
+    "liked": "integer"
   }
 ]
 ```
