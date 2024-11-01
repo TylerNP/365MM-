@@ -69,10 +69,11 @@ def cleaned_csvs(max_read : int):
                 missing += 1
                 print(f"{i}: is a duplicate")
                 continue
-            movie_id += 1
-            movies.append(movie)
             for genre in genres:
                 genres_joined.append({"movie_id":movie_id, "genre_id":genre_ids[genre]})
+
+            movie_id += 1
+            movies.append(movie)
             seen.add(movie["name"]+str(movie["release_date"])+str(genres)+movie["description"])
 
 
