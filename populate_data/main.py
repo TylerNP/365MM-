@@ -32,6 +32,7 @@ def format_date(string_date : str) -> datetime:
 def cleaned_csvs(max_read : int):
     movies = []
     genres_joined = []
+    movie_languages = []
     missing = 0
     genre_ids = {}
     with engine.begin() as connection:
@@ -50,6 +51,7 @@ def cleaned_csvs(max_read : int):
                 break
             movie = {}
             genres = []
+            languges = []
             try:
                 movie["id"] = movie_id
                 movie["name"] = row[header_indices["title"]] 
@@ -57,9 +59,13 @@ def cleaned_csvs(max_read : int):
                 movie["release_date"] = format_date(row[header_indices["release_date"]])
                 movie["budget"] = row[header_indices["budget"]] 
                 movie["box_office"] = row[header_indices["revenue"]] 
+                movie["duration"] = row[header_indices["runtime"]]
                 genre_info = ast.literal_eval(row[header_indices["genres"]])
                 for info in genre_info:
                     genres.append(info["name"])
+                language_info = ast.literal_eval(row(header_indices["spoken_languages"]))
+                for languge in language_info:
+                    languges.append(languge["name"])
             except:
                 missing += 1
                 print(f"{i}: is missing data or malformed")
@@ -71,6 +77,8 @@ def cleaned_csvs(max_read : int):
                 continue
             for genre in genres:
                 genres_joined.append({"movie_id":movie_id, "genre_id":genre_ids[genre]})
+            for language in languges:
+                movie_languages.append({"movie_id":movie_id, "language":language[genre]})
 
             movie_id += 1
             movies.append(movie)
@@ -79,7 +87,7 @@ def cleaned_csvs(max_read : int):
 
     print(f"{missing} rows removed")
 
-    header = ["id", "name", "release_date", "budget", "box_office", "description"]
+    header = ["id", "name", "release_date", "budget", "box_office", "description", "duration"]
     with open(parameter.movie_path, "w", newline='', encoding='utf-8') as file:
         writer = csv.DictWriter(file, fieldnames=header)
         writer.writeheader()
@@ -90,6 +98,11 @@ def cleaned_csvs(max_read : int):
         writer = csv.DictWriter(file, fieldnames=header)
         writer.writeheader()
         writer.writerows(genres_joined)
+    header = ["movie_id", "language"]
+    with open(parameter.language_path, "w", newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames=header)
+        writer.writeheader()
+        writer.writerows(movie_languages)
 
 if __name__ == "__main__":
     max = float('inf')
