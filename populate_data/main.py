@@ -88,7 +88,7 @@ def cleaned_csvs(max_read : int):
     with open(parameter.genre_path, "w", newline='', encoding='utf-8') as file:
         writer = csv.DictWriter(file, fieldnames=header)
         writer.writeheader()
-        writer.writerows(genres)
+        writer.writerows(genres_joined)
 
 if __name__ == "__main__":
     max = float('inf')
