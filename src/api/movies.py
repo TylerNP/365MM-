@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 #from src.api import auth
 from pydantic import BaseModel
-import sqlalchemy
+from datetime import datetime
 from src import database as db
+import sqlalchemy
 
 router = APIRouter(
     prefix = "/movies",
@@ -12,12 +13,13 @@ router = APIRouter(
 
 class Movie(BaseModel):
     name: str
-    release_date: int
+    release_date: datetime
     genres: list[str]
     average_rating: int
     budget: int
     box_office: int
     demographic: list[str]
+    description: str
 
 
 @router.get("/{movie_id}")
@@ -28,7 +30,7 @@ def get_movie(movie_id : int):
     movie = {}
     result = None
     with db.engine.begin() as connection:
-        sql_to_execute = "SELECT name, release_date, genres, average_rating, budget, box_office, demographic FROM movies WHERE id = :movie_id"
+        sql_to_execute = "SELECT name, release_date, description, average_rating, budget, box_office, demographic FROM movies WHERE id = :movie_id"
         result = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
         movie = format_movie(result, movie_id)
     print(movie)
@@ -43,14 +45,14 @@ def new_movie(new_movie : Movie):
     movie_id = 0
     with db.engine.begin() as connection:
         sql_to_execute = """
-                            INSERT INTO movies (name, release_date, genres, average_rating, budget, box_office, demographic)
-                            VALUES (:name, :release_date, :genres, :average_rating, :budget, :box_office, :demographic)
+                            INSERT INTO movies (name, release_date, description, average_rating, budget, box_office, demographic)
+                            VALUES (:name, :release_date, :description, :average_rating, :budget, :box_office, :demographic)
                             RETURNING id
                         """
         values = {
             "name":new_movie.name,
             "release_date":new_movie.release_date,
-            "genres":new_movie.genres,
+            "description":new_movie.description,
             "average_rating":new_movie.average_rating,
             "budget":new_movie.budget,
             "box_office":new_movie.box_office,
@@ -58,6 +60,19 @@ def new_movie(new_movie : Movie):
         }
         try:
             movie_id = connection.execute(sqlalchemy.text(sql_to_execute), values).scalar()
+            sql_to_execute = "SELECT genres.name, genres.id FROM genres ORDER BY genres.name"
+            ids = connection.execute(sqlalchemy.text(sql_to_execute))
+            genre_id = {}
+            for id in ids:
+                genre_id[id.name] = id.id
+            genre_ids = []
+            for new in new_movie.genres:
+                genre_ids.append(genre_id[str(new)])
+            sql_to_execute = "INSERT INTO movie_genres (movie_id, genre_id) VALUES (:movie_id, UNNEST(:genre_ids))"
+            connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id, "genre_ids":genre_ids})
+        except KeyError:
+            print("No Such Genre Exists")
+            return ()
         except sqlalchemy.exc.IntegrityError:
             print("Movie Already Exists")
             return {}
@@ -85,7 +100,7 @@ def get_movie_interested(user_id : int):
                                 movies.id, 
                                 movies.name, 
                                 movies.release_date,
-                                movies.genres,
+                                movies.description,
                                 movies.average_rating,
                                 movies.budget,
                                 movies.box_office, 
@@ -117,7 +132,7 @@ def format_movie(movie_result : object, movie_id : int) -> dict[str, any]:
         movie["movie_id"] = movie_id
         movie["name"] = info.name
         movie["release_date"] = info.release_date
-        movie["genres"] = info.genres
+        movie["description"] = info.description
         movie["average_rating"] = info.average_rating
         movie["budget"] = info.budget
         movie["box_office"] = info.box_office
