@@ -11,6 +11,11 @@ router = APIRouter(
 
 @router.get("/{user_id}")
 def get_recommended(user_id: int):
+    with db.engine.begin() as connection:
+        sql_to_execute = '''
+                        SELECT G          
+                        '''
+    # default to most popular movie
     pass
 
 @router.post("/{user_id}/reset/")
