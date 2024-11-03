@@ -4,3 +4,4 @@
 __pycache__/
 archive/
 other/
+populate_data/parameter.py

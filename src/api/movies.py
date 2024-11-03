@@ -139,4 +139,5 @@ def format_movie(movie_result : object, movie_id : int) -> dict[str, any]:
         movie["average_rating"] = info.average_rating
         movie["budget"] = info.budget
         movie["box_office"] = info.box_office
+        # movie["demographic"] = info.demographic
     return movie
