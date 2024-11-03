@@ -198,12 +198,12 @@ Retrieves the catalog of movies. Each movie will only have one unique entry. <br
   {
     "movie_id": "integer",
     "name": "string",
-    "release_year": "integer",
-    "genres": ["string"],  /*genres list size is capped at 6*/ 
+    "release_date": "datetime",
+    "duration": "integer",
     "average_rating": "integer",
     "budget": "integer",
     "box_office": "integer",
-    "demographic": ["string"]
+    "description": "string"
   }
 ]
 ```
