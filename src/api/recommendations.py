@@ -75,7 +75,7 @@ def get_recommended(user_id: int):
         else: 
             # default to random genre movie
             min_max = connection.execute(sqlalchemy.text("SELECT MIN(id), MAX(id) FROM genres")).one()
-            for id in range(6):
+            for _ in range(6):
                 r = random.randrange(min_max[0], min_max[1])
                 values = {'user_id': user_id, "genre_id": r, "limit": 1}
                 recommended_movies += list(connection.execute(sqlalchemy.text(sql_to_execute), values))
@@ -134,19 +134,6 @@ def generate_recommendation_collab():
         #- Number of Views
 
 """
-
-class PreferanceVector:
-    genre = ""
-    avg_ratings = 0
-    avg_likes = 0
-    def __init__ (self, g : str, r : int, l: int) -> None:
-        self.genre = g
-        self.avg_ratings = r
-        self.avg_likes = l
     
-
 if __name__ == "__main__":
-    user = PreferanceVector("Animation", 7, 9)
-    movie = PreferanceVector("Animation", 3, 1)
-    print(user)
     print("RAN")

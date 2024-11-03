@@ -313,6 +313,8 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
     with db.engine.connect() as connection:
         result = connection.execute(stmt)
         for row in result:
+            if all(value == None for value in row): # no data to analyze
+                return movies
             movies.append(
                 {
                     "movie_id": row.movie_id,
