@@ -34,7 +34,7 @@ app.add_middleware(
 )
 
 app.include_router(users.router)
-# app.include_router(catalog.router)
+app.include_router(catalog.router)
 # app.include_router(groups.router)
 # app.include_router(catalog.router)
 app.include_router(analytics.router)
