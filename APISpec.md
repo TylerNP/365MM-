@@ -514,16 +514,8 @@ Shows all groups available. <br />
 ```
 
 ## 8. Admin
-### 8.1 Delete Movie - `/admin/movies/delete/` (POST)
+### 8.1 Delete Movie - `/admin/{user_id}/movies/delete/{movie_id}` (POST)
 Delete a movie entry. <br />
-
-**Request**:
-
-```json
-{
-  "movie_id": "integer"
-}
-```
 
 **Response**:
 
