@@ -51,7 +51,7 @@ def cleaned_csvs(max_read : int):
                 break
             movie = {}
             genres = []
-            languges = []
+            languages = []
             try:
                 movie["id"] = movie_id
                 movie["name"] = row[header_indices["title"]] 
@@ -59,14 +59,18 @@ def cleaned_csvs(max_read : int):
                 movie["release_date"] = format_date(row[header_indices["release_date"]])
                 movie["budget"] = row[header_indices["budget"]] 
                 movie["box_office"] = row[header_indices["revenue"]] 
-                movie["duration"] = row[header_indices["runtime"]]
+                if not row[header_indices["runtime"]]:
+                    movie["duration"] = 0
+                else:
+                     movie["duration"] = int(float(row[header_indices["runtime"]]))
                 genre_info = ast.literal_eval(row[header_indices["genres"]])
                 for info in genre_info:
                     genres.append(info["name"])
-                language_info = ast.literal_eval(row(header_indices["spoken_languages"]))
-                for languge in language_info:
-                    languges.append(languge["name"])
-            except:
+                language_info = ast.literal_eval(row[header_indices["spoken_languages"]])
+                for info in language_info:
+                    languages.append(info["name"])
+            except Exception as e:
+                print(e)
                 missing += 1
                 print(f"{i}: is missing data or malformed")
                 continue
@@ -77,8 +81,8 @@ def cleaned_csvs(max_read : int):
                 continue
             for genre in genres:
                 genres_joined.append({"movie_id":movie_id, "genre_id":genre_ids[genre]})
-            for language in languges:
-                movie_languages.append({"movie_id":movie_id, "language":language[genre]})
+            for language in languages:
+                movie_languages.append({"movie_id":movie_id, "language":language})
 
             movie_id += 1
             movies.append(movie)
