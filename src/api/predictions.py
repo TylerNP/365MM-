@@ -31,4 +31,54 @@ def create_prediction(movie_id : int):
     # COMPARE SIMILARITY (e.g. count how many of the same genres, compare movie length, etc)
     # Use some formula (e.g. movies with blank genres get an avg rating of 7, longer movies get lower reviews, etc)
     # Predict box_office, ratings, and views based off similarity
+    sql_to_execute = """
+        WITH search_genres AS (
+            SELECT movie_genres.genre_id 
+            FROM movie_genres 
+            WHERE movie_genres.movie_id = :movie_id
+        ),
+        movie_to_check AS (
+            SELECT movies.id 
+            FROM movies 
+            JOIN movie_genres ON movies.id = movie_genres.movie_id 
+            JOIN search_genres ON movie_genres.genre_id = search_genres.genre_id
+            WHERE movies.id != :movie_id
+        ),
+            movie_ratings AS (
+            SELECT movie_to_check.id, AVG(ratings.rating) AS avg
+            FROM movie_to_check
+            JOIN ratings ON movie_to_check.id = ratings.movie_id
+            GROUP BY movie_to_check.id
+        ),
+            movie_views AS (
+            SELECT movie_to_check.id, COUNT(watched_movies.movie_id) AS view
+            FROM movie_to_check
+            JOIN watched_movies ON movie_to_check.id = watched_movies.movie_id
+            GROUP BY movie_to_check.id
+        ),
+            movie_rev AS (
+            SELECT movie_to_check.id, movies.box_office 
+            FROM movie_to_check
+            JOIN movies ON movie_to_check.id = movies.id AND box_office != 0
+        )
+
+        SELECT movie_to_check.id, ARRAY_AGG(genres.name) AS genres, movie_views.view, movie_ratings.avg, movie_rev.box_office
+        FROM movie_to_check
+        JOIN movie_genres ON movie_to_check.id = movie_genres.movie_id 
+        JOIN search_genres ON movie_genres.genre_id = search_genres.genre_id
+        JOIN genres ON movie_genres.genre_id = genres.id
+        LEFT JOIN movie_views ON movie_to_check.id = movie_views.id 
+        LEFT JOIN movie_ratings ON movie_to_check.id = movie_ratings.id 
+        LEFT JOIN movie_rev ON movie_to_check.id = movie_rev.id 
+        WHERE view IS NOT NULL OR avg IS NOT NULL OR box_office IS NOT NULL
+        GROUP BY movie_to_check.id, movie_views.view, movie_ratings.avg, movie_rev.box_office
+    """
+
+    #LOOK AT ROWS
+    # LOOK AT MATCHING GENRES (COUNT HOW MANY THE SAME)
+    # SUM EACH RESULT * SIMILARITY 
+    # KEEP TRACK OF NUMBER OF EACH RESULT 
+    # AVERAGE EACH RESULT
+    # INSERT INTO PREDICTION TABLE (predicted_ratings, predicted_views, box_office)
+
     return "OK"
