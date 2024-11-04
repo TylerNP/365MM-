@@ -29,7 +29,7 @@ def get_group_info(group_id : int):
             SELECT 
                 groups.name, 
                 groups.description, 
-                ARRAY_AGG(genres.id) AS interests
+                ARRAY_AGG(genres.name) AS interests
             FROM 
                 groups 
             JOIN
@@ -84,18 +84,70 @@ def create_group(group : new_group, user_id : int):
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
     return {"group_id":group_id}
 
-@router.post("/{group_id}/join/{user_id}")
+@router.post("/{group_id}/join/")
 def join_group(group_id : int, user_id : int):
-    return "OK"
+    with db.engine.begin() as connection:
+        sql_to_execute = "INSERT INTO groups_joined (user_id, group_id, role) VALUES (:user_id, :group_id, 'Member')"
+        try:
+            connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
+        except sqlalchemy.exc.IntegrityError:
+            print("Already a member of this group")
+    return {"success":True}
 
-@router.post("/{group_id}/remove/{user_id}")
+@router.post("/{group_id}/remove/")
 def remove_from_group(group_id : int, user_id : int):
-    return "OK"
+    with db.engine.begin() as connection:
+        sql_to_execute = "DELETE FROM groups_joined WHERE group_id = :group_id AND user_id = :user_id"
+        connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
+    return {"success":True}
 
-@router.post("/{group_id}/delete/{user_id}")
-def delete_group(gro):
-    return "OK"
+@router.post("/{group_id}/delete/")
+def delete_group(group_id : int, user_id : int):
+    with db.engine.begin() as connection:
+        try:
+            sql_to_execute = """
+                SELECT 1 
+                FROM users 
+                JOIN groups_joined 
+                    ON users.id = groups_joined.user_id AND groups_joined.role = 'Owner'
+                WHERE users.id = :user_id
+            """
+            connection.execute(sqlalchemy.text(sql_to_execute), {"user_id":user_id}).scalar_one()
+        except sqlalchemy.exc.NoResultFound:
+            raise HTTPException(status_code=403, detail="Invalid Authorization")
+        sql_to_execute = "DELETE FROM groups WHERE groups.id = :group_id"
+        connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id})
+    return {"success":True}
 
 @router.get("/list/")
 def list_groups():
-    return "OK"
+    result = None
+    with db.engine.begin() as connection:
+        sql_to_execute = """
+            SELECT 
+                groups.name, 
+                groups.description, 
+                ARRAY_AGG(genres.name) AS interests
+            FROM 
+                groups 
+            LEFT JOIN
+                liked_genres_groups ON groups.id = liked_genres_groups.group_id
+            LEFT JOIN
+                genres ON liked_genres_groups.genre_id = genres.id
+            GROUP BY
+                groups.name,
+                groups.description
+            LIMIT 5
+        """
+        result = connection.execute(sqlalchemy.text(sql_to_execute))
+
+    groups = []
+    for value in result:
+        groups.append(
+            {
+                "name":value.name,
+                "description":value.description,
+                "interests":value.interests
+            }
+        )
+    return groups

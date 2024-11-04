@@ -445,7 +445,7 @@ Get information about a group. <br />
 {
   "group_name": "string",
   "group_desciprtion": "string",
-  "group_interests": ["string"]
+  "group_interests": ["string"],
 }
 ```
 
@@ -471,7 +471,7 @@ Create a new group with the user as the owner of this group <br />
 }
 ```
 
-### 7.3 Join group - `/groups/{group_id}/join/{user_id}` (POST)
+### 7.3 Join group - `/groups/{group_id}/join/` (POST)
 Add an user to a specific group. <br />
 
 **Request**:
@@ -490,7 +490,7 @@ Add an user to a specific group. <br />
 }
 ```
 
-### 7.4 Remove User From Group - `/groups/{group_id}/remove/{user_id}` (POST)
+### 7.4 Remove User From Group - `/groups/{group_id}/remove/` (POST)
 Remove an user from the group. <br />
 
 **Request**:
@@ -509,8 +509,18 @@ Remove an user from the group. <br />
 }
 ```
 
-### 7.5 Delete Group - `/groups/{user_id}/delete/{group_id}` (POST)
+### 7.5 Delete Group - `/groups/delete/{group_id}` (POST)
 Delete a group. <br />
+
+**Request**:
+
+```json
+
+{
+    "user_id": "integer"
+}
+
+```
 
 **Response**:
 
