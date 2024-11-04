@@ -80,5 +80,12 @@ def create_prediction(movie_id : int):
     # KEEP TRACK OF NUMBER OF EACH RESULT 
     # AVERAGE EACH RESULT
     # INSERT INTO PREDICTION TABLE (predicted_ratings, predicted_views, box_office)
+    # EX: 2 With Movies 
+    #   1st Movie With Rating 7 And Similarity Score 2
+    #   2nd Movie With Rating 5 And Similarity Score 3
+    #   
+    #  Rating_Total = 7*2 + 5*3
+    #  Rating_Count = 2 + 3
+    #  Rating_Avg = (14+15) / 5 -> 5.8
 
     return "OK"
