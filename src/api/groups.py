@@ -18,6 +18,9 @@ class new_group(BaseModel):
 
 @router.get("/{group_id}")
 def get_group_info(group_id : int):
+    """
+    Get the info about a group
+    """
     sql_to_execute = "SELECT 1 FROM groups WHERE groups.id = :group_id"
     values = {"group_id":group_id}
     with db.engine.begin() as connection:
@@ -54,6 +57,9 @@ def get_group_info(group_id : int):
 
 @router.post("/new/{user_id}")
 def create_group(group : new_group, user_id : int):
+    """
+    Create a new group with the user as owner 
+    """
     if len(group.group_scores) != len(group.group_inerests):
         raise HTTPException(status_code=400, detail="Invalid Format")
     with db.engine.begin() as connection:
@@ -86,6 +92,9 @@ def create_group(group : new_group, user_id : int):
 
 @router.post("/{group_id}/join/")
 def join_group(group_id : int, user_id : int):
+    """
+    Add a user to a group
+    """
     with db.engine.begin() as connection:
         sql_to_execute = "INSERT INTO groups_joined (user_id, group_id, role) VALUES (:user_id, :group_id, 'Member')"
         try:
@@ -96,6 +105,9 @@ def join_group(group_id : int, user_id : int):
 
 @router.post("/{group_id}/remove/")
 def remove_from_group(group_id : int, user_id : int):
+    """
+    Remove a user form a group
+    """
     with db.engine.begin() as connection:
         sql_to_execute = "DELETE FROM groups_joined WHERE group_id = :group_id AND user_id = :user_id"
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
@@ -103,6 +115,9 @@ def remove_from_group(group_id : int, user_id : int):
 
 @router.post("/{group_id}/delete/")
 def delete_group(group_id : int, user_id : int):
+    """
+    Delete a group (only owners can)
+    """
     with db.engine.begin() as connection:
         try:
             sql_to_execute = """
@@ -121,6 +136,9 @@ def delete_group(group_id : int, user_id : int):
 
 @router.get("/list/")
 def list_groups():
+    """
+    List all groups
+    """
     result = None
     with db.engine.begin() as connection:
         sql_to_execute = """
@@ -137,7 +155,8 @@ def list_groups():
             GROUP BY
                 groups.name,
                 groups.description
-            LIMIT 5
+            ORDER BY 
+                groups.name
         """
         result = connection.execute(sqlalchemy.text(sql_to_execute))
 
