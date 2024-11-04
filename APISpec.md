@@ -449,8 +449,8 @@ Get information about a group. <br />
 }
 ```
 
-### 7.2 Create Group - `/groups/{group_id}` (PUT)
-Create a new group for users to join. <br />
+### 7.2 Create Group - `/groups/new/{user_id}` (POST)
+Create a new group with the user as the owner of this group <br />
 
 **Request**:
 
@@ -458,7 +458,8 @@ Create a new group for users to join. <br />
 {
   "group_name": "string",
   "group_desciprtion": "string",
-  "group_interests": ["string"]
+  "group_interests": ["string"],
+  "group_scores": ["integer"] /* group_scores must be same length as group_inerests */
 }
 ```
 
@@ -470,7 +471,7 @@ Create a new group for users to join. <br />
 }
 ```
 
-### 7.3 Join group - `/groups/{group_id}/join/` (POST)
+### 7.3 Join group - `/groups/{group_id}/join/{user_id}` (POST)
 Add an user to a specific group. <br />
 
 **Request**:
@@ -489,7 +490,7 @@ Add an user to a specific group. <br />
 }
 ```
 
-### 7.4 Remove User From Group - `/groups/{group_id}/remove/` (POST)
+### 7.4 Remove User From Group - `/groups/{group_id}/remove/{user_id}` (POST)
 Remove an user from the group. <br />
 
 **Request**:
@@ -508,7 +509,7 @@ Remove an user from the group. <br />
 }
 ```
 
-### 7.5 Delete Group - `/groups/{group_id}` (POST)
+### 7.5 Delete Group - `/groups/{user_id}/delete/{group_id}` (POST)
 Delete a group. <br />
 
 **Response**:

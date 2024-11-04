@@ -17,7 +17,7 @@ def delete_movie(user_id : int, movie_id : int):
         try:
             connection.execute(sqlalchemy.text(sql_to_execute), {"user_id":user_id}).scalar_one()
         except sqlalchemy.exc.NoResultFound:
-            raise HTTPException(status_code=401, detail="Forbidden")
+            raise HTTPException(status_code=403, detail="Invalid Authorization")
         sql_to_execute = "DELETE FROM movies WHERE id = :movie_id"
         connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
     return {"success": True}
