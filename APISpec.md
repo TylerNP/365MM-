@@ -445,12 +445,12 @@ Get information about a group. <br />
 {
   "group_name": "string",
   "group_desciprtion": "string",
-  "group_interests": ["string"]
+  "group_interests": ["string"],
 }
 ```
 
-### 7.2 Create Group - `/groups/{group_id}` (PUT)
-Create a new group for users to join. <br />
+### 7.2 Create Group - `/groups/new/{user_id}` (POST)
+Create a new group with the user as the owner of this group <br />
 
 **Request**:
 
@@ -458,7 +458,8 @@ Create a new group for users to join. <br />
 {
   "group_name": "string",
   "group_desciprtion": "string",
-  "group_interests": ["string"]
+  "group_interests": ["string"],
+  "group_scores": ["integer"] /* group_scores must be same length as group_inerests */
 }
 ```
 
@@ -508,8 +509,18 @@ Remove an user from the group. <br />
 }
 ```
 
-### 7.5 Delete Group - `/groups/{group_id}` (POST)
+### 7.5 Delete Group - `/groups/delete/{group_id}` (POST)
 Delete a group. <br />
+
+**Request**:
+
+```json
+
+{
+    "user_id": "integer"
+}
+
+```
 
 **Response**:
 
