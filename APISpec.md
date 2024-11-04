@@ -248,16 +248,16 @@ Creates a reocmmendation list based off user prefences (likes/dislikes) <br />
     "movie_id": "integer",
     "name": "string",
     "release_year": "integer",
-    "genres": ["string"],  /*genres list size is capped at 6*/ 
     "average_rating": "integer",
     "budget": "integer",
     "box_office": "integer",
+    "genres": ["string"],  /*genres list size is capped at 6*/ 
     "languages": ["string"]
   }
 ]
 ```
 
-### 4.2 Reset Recommendations - `/recommend/{user_id}/reset/` (POST)
+<!-- ### 4.2 Reset Recommendations - `/recommend/{user_id}/reset/` (POST)
 Reset a given users recommendations defaulting to most popular <br />
 
 **Response**:
@@ -325,11 +325,11 @@ Provides a list of movies that both an actor and director have worked on togethe
     "languages": ["string"]
   }
 ]
-```
+``` -->
 
 ## 5. Analytics
 ### 5.1 Get Analytics - `/analytics/{movie_id}` (GET)
-Get the performance data of a movie <br />
+Get the performance data of a movie (respect to 365mm's proprietary data) <br />
 
 **Response**:
 
@@ -344,7 +344,7 @@ Get the performance data of a movie <br />
 ```
 
 ### 5.2 Get Analytics Genre - `/analytics/{genre}` (GET)
-Based on genre provide average movie performance for records in existing ratings, watch history, likes, and dislikes <br />
+Based on genre provide average movie performance for records in existing ratings, watch history (respect to 365mm's proprietary data), likes, and dislikes <br />
 
 **Response**:
 
@@ -363,7 +363,7 @@ Based on genre provide average movie performance for records in existing ratings
 ```
 
 ## 5.3 Get Analytics Popular - `/analytics/popular/` (GET)
-Provides a list of the performance of the top 5 of either the most rated, most viewed, or most liked movies <br />
+Provides a list of the performance of the top 5 of either the most rated, most viewed, or most liked movies (respect to 365mm's proprietary data) <br />
 
 **Response**:
 

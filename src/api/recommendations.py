@@ -29,6 +29,7 @@ def get_recommended(user_id: int):
         users_top_genres = list(connection.execute(sqlalchemy.text(sql_to_execute), values))
         number_of_genres = len(users_top_genres)
         recommended_movies = []
+        # Make a with table for not watched movies, and then filter off of that in later version
         sql_to_execute = """
                                 SELECT
                                 movies.id,
@@ -37,10 +38,14 @@ def get_recommended(user_id: int):
                                 movies.description,
                                 movies.average_rating,
                                 movies.budget,
-                                movies.box_office
+                                movies.box_office,
+                                ARRAY_AGG( DISTINCT COALESCE( genres.name, 'N/A')) as genres,
+                                ARRAY_AGG( DISTINCT COALESCE(movie_languages.language, 'N/A')) as languages
                                 FROM
                                 movies
                                 JOIN movie_genres ON movies.id = movie_genres.movie_id 
+                                JOIN genres ON movie_genres.genre_id = genres.id
+                                LEFT JOIN movie_languages on movies.id = movie_languages.movie_id
                                 WHERE
                                 NOT EXISTS (
                                     SELECT
@@ -51,10 +56,16 @@ def get_recommended(user_id: int):
                                     user_id = :user_id
                                     AND movie_id = movies.id
                                 ) AND movie_genres.genre_id = :genre_id
+                                GROUP BY movies.id,
+                                movies.name,
+                                movies.release_date,
+                                movies.description,
+                                movies.average_rating,
+                                movies.budget,
+                                movies.box_office
                                 ORDER BY
                                 RANDOM()
-                                LIMIT
-                                :limit
+                                LIMIT :limit
                             """
         # based on how many genres a user has indirectly positivly rated, we will return a different proportion of movies related to genres
         if number_of_genres == 3:
@@ -92,6 +103,8 @@ def format_movie(movie_result) -> dict[str, any]:
     movie["average_rating"] = movie_result[4]
     movie["budget"] = movie_result[5]
     movie["box_office"] = movie_result[6]
+    movie["genre"] = movie_result[7]
+    movie["language"] = movie_result[8]
     return movie
 
             
@@ -104,13 +117,13 @@ def format_movie(movie_result) -> dict[str, any]:
 # def delete_recommendation():
 #     return NotImplemented
 
-@router.post("/{user_id}/generate/")
-def generate_recommendation():
-    return NotImplemented
+# @router.post("/{user_id}/generate/")
+# def generate_recommendation():
+#     return NotImplemented
 
-@router.post("/{user_id}/collab/")
-def generate_recommendation_collab():
-    return NotImplemented
+# @router.post("/{user_id}/collab/")
+# def generate_recommendation_collab():
+#     return NotImplemented
 
 """
     https://pyimagesearch.com/2023/06/19/fundamentals-of-recommendation-systems/
