@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-#from src.api.movies import format_movie
 #from src.api import auth
 import sqlalchemy
 from src import database as db

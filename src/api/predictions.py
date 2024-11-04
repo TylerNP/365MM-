@@ -27,4 +27,8 @@ def get_prediction(movie_id : int):
 
 @router.post("/generate/")
 def create_prediction(movie_id : int):
+    # Get data on movies similary -> BY GENRES (USE SELECT)
+    # COMPARE SIMILARITY (e.g. count how many of the same genres, compare movie length, etc)
+    # Use some formula (e.g. movies with blank genres get an avg rating of 7, longer movies get lower reviews, etc)
+    # Predict box_office, ratings, and views based off similarity
     return "OK"
