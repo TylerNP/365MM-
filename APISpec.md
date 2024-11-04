@@ -379,29 +379,6 @@ Provides a list of the performance of the top 5 of either the most rated, most v
 ]
 ```
 
-### 5.4 Search Analytics - `/analytics/search, tag=["SEARCH"]`
-Searches for movies based off querry parameters <br />
-
-**Querry Parameters**:
-
-- `movie_name`(optional): The name of the movie
-- `budget`(optional): The budget of the movie
-- `box-office`(optional): The box-office performance of the movie
-- `demographic`(optional): The viewing demographic of the movie
-- `sort_col`(optional): The column to sort the movies by. Possible values: `budget`, `box-office`, `demographic`, and `movie_name`
-- `sort_order`(optional): The order the result appears. Possible values: `asc`(ascending) or `desc`(descending). Default: `asc`
-
-**Response**:
-
-The API responds with a JSON object with the following:
-- `previous`: A string that represents the link to the previous search page if it exists. If no such page exists this string will be empty.
-- `next`: A string that represents the link to the search next page if it exists. If no such page exists this string will be empty. 
-- `results`: An array of objects, each representing an analytics item. Each analytics item has the following properties:
-  - `movie_id`: An integer that represents the unique identifier of the movie item
-  - `budget`: An integer representing the budget of the movie
-  - `box-office`: An integer representing the performance of the movie in the box-office
-  - `demographic`: A string that represents the demographics viewing the movie
-
 ## 6. Predictions
 ### 6.1 Get Prediction - `/predictions/{movie_id}` (GET)
 Gets information about a prediction of a movie performance in respect with the box-office and viewing languages. <br />
@@ -411,8 +388,8 @@ Gets information about a prediction of a movie performance in respect with the b
 ```json
 {
   "predicted_rating": "integer",
-  "box-office": "integer",
-  "viewing_languages": ["string"]
+  "predicted_views": "integer",
+  "box-office": "integer"
 }
 ```
 

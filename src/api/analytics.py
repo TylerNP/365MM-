@@ -80,7 +80,8 @@ def get_movie_analytics(movie_id : int):
 @router.get("/genre/{genre}")
 def get_genre_analytics(genre : str):
     """
-    Obtain information about the avg statistics of movies in a specific genre given they have some form of user interaction (rate, watched, liked)
+    Obtain information about the avg statistics of movies in a specific genre 
+    given they have some form of user interaction (rate, watched, liked)
     """
     result = None
     with db.engine.begin() as connection:
@@ -235,7 +236,9 @@ class SearchOptions(str, Enum):
 
 @router.get("/popular")
 def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
-    
+    """
+    Get the top 5 movies by ratings, views, or likes
+    """
     movie_views = (
         sqlalchemy.select(
             db.movies.c.id.label("movie_id"),
