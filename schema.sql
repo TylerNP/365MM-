@@ -138,6 +138,7 @@ create table
     predicted_views bigint null,
     box_office bigint null,
     constraint predictions_pkey primary key (id),
+    constraint unique_prediction_movie_id unique (movie_id),
     constraint predictions_movie_id_fkey foreign key (movie_id) references movies (id) on update cascade on delete cascade
   ) tablespace pg_default;
 
@@ -201,20 +202,53 @@ create table
     constraint watched_movies_user_id_fkey foreign key (user_id) references users (id) on update cascade on delete cascade
   ) tablespace pg_default;
   
-/*
-Data Used For v1_manual_testing/
 
-INSERT INTO users (username) VALUES ('Rakesh');
+-- Data Used For v1_manual_testing/
 
-INSERT INTO movies (name, genres, average_rating, budget, demographic, box_office, release_date ) VALUES ('Toy Story', ARRAY['Animation', 'Comedy', 'Family'], 0, 30000000, ARRAY[]::text[], 373554033, '1995-10-30 00:00:00+00');
-INSERT INTO movies (name, genres, average_rating, budget, demographic, box_office, release_date ) VALUES ('Jumanji', ARRAY['Adventure', 'Fantasy', 'Family'], 0, 65000000, ARRAY[]::text[], 262797249, '1995-12-15 00:00:00+00');
-INSERT INTO movies (name, genres, average_rating, budget, demographic, box_office, release_date ) VALUES ('Grumpier Old Men', ARRAY['Romance', 'Comedy'], 0, 0, ARRAY[]::text[], 0, '1995-12-22 00:00:00+00');
-INSERT INTO movies (name, genres, average_rating, budget, demographic, box_office, release_date ) VALUES ('Waiting to Exhale', ARRAY['Comedy', 'Drama', 'Romance'], 0, 16000000, ARRAY[]::text[], 81452156, '1995-12-22 00:00:00+00');
-INSERT INTO movies (name, genres, average_rating, budget, demographic, box_office, release_date ) VALUES ('Father of the Bride Part II', ARRAY['Comedy'], 0, 0, ARRAY[]::text[], 76578911, '1995-02-10 00:00:00+00');
+INSERT INTO users (user_id, username) VALUES (23, 'Rakesh');
+
+INSERT INTO genres (id, name) VALUES (1, 'Animation');
+INSERT INTO genres (id, name) VALUES (2, 'Comedy');
+INSERT INTO genres (id, name) VALUES (3, 'Family');
+INSERT INTO genres (id, name) VALUES (4, 'Adventure');
+INSERT INTO genres (id, name) VALUES (5, 'Fantasy');
+INSERT INTO genres (id, name) VALUES (6, 'Romance');
+INSERT INTO genres (id, name) VALUES (7, 'Drama');
+
+INSERT INTO movies (name, average_rating, budget, description, box_office, release_dat ) VALUES ('Toy Story',  0, 30000000, '', 373554033, '1995-10-30 00:00:00+00');
+INSERT INTO movie_genres (movie_id, genre_id) VALUES (1, 1);
+INSERT INTO movie_genres (movie_id, genre_id) VALUES (1, 2);
+INSERT INTO movie_genres (movie_id, genre_id) VALUES (1, 3);
+INSERT INTO movie_languages (movie_id, language) VALUES (1, "English")
+
+INSERT INTO movies (name, average_rating, budget, description, box_office, release_date) VALUES ('Jumanji', 0, 65000000, '', 262797249, '1995-12-15 00:00:00+00');
+INSERT INTO movie_genres (movie_id, genre_id) VALUES (2, 3);
+INSERT INTO movie_genres (movie_id, genre_id) VALUES (2, 4);
+INSERT INTO movie_genres (movie_id, genre_id) VALUES (2, 5);
+INSERT INTO movie_languages (movie_id, language) VALUES (2, "English")
+
+INSERT INTO movies (name, average_rating, budget, description, box_office, release_date) VALUES ('Grumpier Old Men', 0, 0, '', 0, '1995-12-22 00:00:00+00');
+INSERT INTO movie_genres (movie_id, genre_id) VALUES (3, 5);
+INSERT INTO movie_genres (movie_id, genre_id) VALUES (3, 6);
+INSERT INTO movie_languages (movie_id, language) VALUES (3, "English")
+
+INSERT INTO movies (name, average_rating, budget, description, box_office, release_date) VALUES ('Waiting to Exhale',  0, 16000000, '', 81452156, '1995-12-22 00:00:00+00');
+INSERT INTO movie_genres (movie_id, genre_id) VALUES (4, 2);
+INSERT INTO movie_genres (movie_id, genre_id) VALUES (4, 6);
+INSERT INTO movie_genres (movie_id, genre_id) VALUES (4, 7);
+INSERT INTO movie_languages (movie_id, language) VALUES (4, "English")
+
+INSERT INTO movies (name, average_rating, budget, description, box_office, release_date) VALUES ('Father of the Bride Part II', 0, 0, '', 76578911, '1995-02-10 00:00:00+00');
+INSERT INTO movie_genres (movie_id, genre_id) VALUES (5, 2);
+INSERT INTO movie_languages (movie_id, language) VALUES (5, "English")
 
 INSERT INTO watched_movies (user_id, movie_id) VALUES (23, 1);
 INSERT INTO watched_movies (user_id, movie_id) VALUES (23, 2);
 INSERT INTO watched_movies (user_id, movie_id) VALUES (23, 5);
-*/
+
+-- Data Used For v2_manual_testing (Uses v1 Data Too)
   
+INSERT INTO users (user_id, username) VALUES (24, 'Rupinder');
+
+INSERT INTO ratings (movie_id, user_id, rating) VALUES (5, 24, 9);
 
