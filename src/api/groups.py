@@ -131,6 +131,7 @@ def delete_group(group_id : int, user_id : int):
         except sqlalchemy.exc.NoResultFound:
             raise HTTPException(status_code=403, detail="Invalid Authorization")
         sql_to_execute = "DELETE FROM groups WHERE groups.id = :group_id"
+        print(sql_to_execute)
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id})
     return {"success":True}
 
@@ -142,9 +143,21 @@ def list_groups():
     result = None
     with db.engine.begin() as connection:
         sql_to_execute = """
+            WITH members AS (
+                SELECT 
+                    groups.id,
+                    COUNT(groups_joined.group_id) AS members
+                FROM 
+                    groups
+                JOIN 
+                    groups_joined ON groups.id = groups_joined.group_id
+                GROUP BY
+                    groups.id
+            )
             SELECT 
                 groups.name, 
                 groups.description, 
+                members.members,
                 ARRAY_AGG(genres.name) AS interests
             FROM 
                 groups 
@@ -152,9 +165,12 @@ def list_groups():
                 liked_genres_groups ON groups.id = liked_genres_groups.group_id
             LEFT JOIN
                 genres ON liked_genres_groups.genre_id = genres.id
+            LEFT JOIN
+                members ON groups.id = members.id
             GROUP BY
                 groups.name,
-                groups.description
+                groups.description,
+                members.members
             ORDER BY 
                 groups.name
         """
@@ -166,6 +182,7 @@ def list_groups():
             {
                 "name":value.name,
                 "description":value.description,
+                "members":value.members,
                 "interests":value.interests
             }
         )
