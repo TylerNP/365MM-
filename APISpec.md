@@ -422,7 +422,7 @@ Get information about a group. <br />
 {
   "group_name": "string",
   "group_desciprtion": "string",
-  "group_interests": ["string"],
+  "group_interests": ["string"]
 }
 ```
 
@@ -519,6 +519,7 @@ Shows all groups available. <br />
   {
     "group_name": "string",
     "group_desciprtion": "string",
+    "members": "integer",
     "group_interests": ["string"]
   }
 ]
@@ -527,6 +528,17 @@ Shows all groups available. <br />
 ## 8. Admin
 ### 8.1 Delete Movie - `/admin/{user_id}/movies/delete/{movie_id}` (POST)
 Delete a movie entry. <br />
+
+**Response**:
+
+```json
+{
+  "success": "boolean"
+}
+```
+
+### 8.2 Delete Movie - `/admin/{user_id}/delete/delete/{group_id}` (POST)
+Delete a group entry. <br />
 
 **Response**:
 

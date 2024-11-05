@@ -203,9 +203,15 @@ create table
   ) tablespace pg_default;
   
 
--- Data Used For v1_manual_testing/
+-- Data Used For manual_testing
 
+INSERT INTO users (user_id, username, is_admin) VALUES (1, 'taran', True)
+INSERT INTO users (user_id, username) VALUES (20, 'P_1');
+INSERT INTO users (user_id, username) VALUES (21, 'P_2');
+INSERT INTO users (user_id, username) VALUES (22, 'P_3')
 INSERT INTO users (user_id, username) VALUES (23, 'Rakesh');
+INSERT INTO users (user_id, username) VALUES (24, 'Rupinder');
+INSERT INTO users (user_id, username) VALUES (25, 'John_Smith');
 
 INSERT INTO genres (id, name) VALUES (1, 'Animation');
 INSERT INTO genres (id, name) VALUES (2, 'Comedy');
@@ -232,7 +238,7 @@ INSERT INTO movie_genres (movie_id, genre_id) VALUES (3, 5);
 INSERT INTO movie_genres (movie_id, genre_id) VALUES (3, 6);
 INSERT INTO movie_languages (movie_id, language) VALUES (3, "English")
 
-INSERT INTO movies (name, average_rating, budget, description, box_office, release_date) VALUES ('Waiting to Exhale',  0, 16000000, '', 81452156, '1995-12-22 00:00:00+00');
+INSERT INTO movies (name, average_rating, budget, description, box_office, release_date) VALUES ('Waiting to Exhale', 0, 16000000, '', 81452156, '1995-12-22 00:00:00+00');
 INSERT INTO movie_genres (movie_id, genre_id) VALUES (4, 2);
 INSERT INTO movie_genres (movie_id, genre_id) VALUES (4, 6);
 INSERT INTO movie_genres (movie_id, genre_id) VALUES (4, 7);
@@ -245,10 +251,26 @@ INSERT INTO movie_languages (movie_id, language) VALUES (5, "English")
 INSERT INTO watched_movies (user_id, movie_id) VALUES (23, 1);
 INSERT INTO watched_movies (user_id, movie_id) VALUES (23, 2);
 INSERT INTO watched_movies (user_id, movie_id) VALUES (23, 5);
+INSERT INTO watched_movies (user_id, movie_id) VALUES (21, 3);
+INSERT INTO watched_movies (user_id, movie_id) VALUES (22, 3);
 
--- Data Used For v2_manual_testing (Uses v1 Data Too)
-  
-INSERT INTO users (user_id, username) VALUES (24, 'Rupinder');
-
+INSERT INTO ratings (user_id, movie_id, rating) VALUES (21, 3, 5);
+INSERT INTO ratings (user_id, movie_id, rating) VALUES (22, 3, 7);
 INSERT INTO ratings (movie_id, user_id, rating) VALUES (5, 24, 9);
+
+INSERT INTO liked_movies (user_id, movie_id, liked) VALUES (20, 3, True);
+INSERT INTO liked_movies (user_id, movie_id, liked) VALUES (21, 3, True);
+INSERT INTO liked_movies (user_id, movie_id, liked) VALUES (22, 3, False);
+
+INSERT INTO predictions (movie_id, predicted_ratings, predicted_views, box_office) VALUES (1, 9, 5, 300000000)
+
+INSERT INTO groups (name, description) VALUES ('group_1', '');
+INSERT INTO groups (name, description) VALUES {'group_2', };
+
+
+INSERT INTO liked_genres_groups (genre_id, group_id, score) VALUES (1, 1, 7);
+INSERT INTO liked_genres_groups (genre_id, group_id, score) VALUES (2, 2, 7);
+
+INSERT INTO movie_genres (moie_id, genre_id) VALUES (1, 1,  0)
+INSERT INTO movie_genres (moie_id, genre_id) VALUES (1, 2, 0)
 

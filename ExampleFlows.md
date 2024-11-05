@@ -13,21 +13,22 @@ Finally, he then makes call to POST `/users/{id}/list/{movie_id}/watched`, where
 
 
 #### GET A MOVIE TO WATCH TODAY
-Rakesh had a long day and wants to watch a movie. He is too tired to think of a movie. Rakesh first logs in by making a POST request to `/users/login`. He then makes a GET request to `/movies/user/{user_id}/` which returns a movie that he has not already watched, but has shown intrest in from past recomendations. Rakesh then deciedes to watch that movie. 
+Rakesh had a long day and wants to watch a movie. He is too tired to think of a movie. Rakesh first logs in by making a POST request to `/users/login`. He then makes a GET request to `/movies/user/{user_id}/` which returns a new movie that he has not already watched. He wants to know more about the movie so he calls `/analytcs/movies/{movie-id}`
 
 Rakesh starts by calling POST `/users/login` to log in.
 He then makes a GET request to `/movies/user/{user_id}/` where he is given a movie to watch
+Rakesh then enjoys the rest of his day by watching the new movie and wants to see how it performed `/analytics/movies/{movie_id}`ven a movie to watch
 Rakesh then enjoys the rest of his day by watching the new movie
 
 ##### Already watched from watching a movie
-###### Taran (movie not found if not there) (search by title and genre or or them)
-John Smith just watched a new movie in the theatres. He really enjoyed this movie and would like to see similar movies. He goes on (our project) and searches for the movie he just watched. He adds it to his list of liked movies and rates it from 1-10. John then requests to see movies like the one he just likes and rated.
+John Smith just watched Toy Story in the theatres. He goes on 365MM and searches for the movie he just watched. He adds it to his list of liked movies and wants to see how it will perform. 
 
-John starts by logging into or signing up for an account 
-He calls SEARCH and inputs the movie he just watched.
-If he liked the movie, He calls ADD to his liked movie list with his rating.
-He decides he would like to see which movies are similar to the movie he just watched so he calls RECOMMEND
+He calls SEARCH and inputs the movie he just watched by calling `/catalog/search`
+If he liked the movie, He calls ADD to his movie list with `/users/{user_id}/add/{movie_id}/`
+Afterwards he checks the predictions on the movie with `/predictions/{movie_id}`
 
+
+# Additional Flows
 #### Advanced search feature
 Jane, a user who wants to see a movie but doesn’t know the movie title, wants to search for the movie using the director(which she knows).
 

@@ -1,9 +1,9 @@
-# Example Workflow
-Rakesh had a long day and wants to watch a movie. He is too tired to think of a movie. Rakesh first logs in by making a POST request to `/users/login`. He then makes a GET request to `/movies/user/{user_id}/` which returns a movie that he has not already watched, but has shown intrest in from past recomendations. Rakesh then deciedes to watch that movie. 
+#### GET A MOVIE TO WATCH TODAY
+Rakesh had a long day and wants to watch a movie. He is too tired to think of a movie. Rakesh first logs in by making a POST request to `/users/login`. He then makes a GET request to `/movies/user/{user_id}/` which returns a new movie that he has not already watched. He wants to know more about the movie so he calls `/analytcs/movies/{movie-id}`
 
 Rakesh starts by calling POST `/users/login` to log in.
 He then makes a GET request to `/movies/user/{user_id}/` where he is given a movie to watch
-Rakesh then enjoys the rest of his day by watching the new movie
+Rakesh then enjoys the rest of his day by watching the new movie and wants to see how it performed `/analytics/movies/{movie_id}`
 
 # Testing Results
 
@@ -32,5 +32,20 @@ curl -X 'GET' \
   "average_rating": 0,
   "budget": 0,
   "box_office": 0,
+}
+
+3. `/analytics/movies/3`
+**Request**
+curl -X 'GET' \
+  'http://127.0.0.1:3000/analytics/movies/3' \
+  -H 'accept: application/json'
+
+**Response**
+{
+  "views": 2,
+  "rated": 2,
+  "average_rating": 6,
+  "liked": 2,
+  "disliked": 1
 }
 
