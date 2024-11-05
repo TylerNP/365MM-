@@ -113,7 +113,7 @@ curl -X 'GET' \
   "movie_id": 3,
   "name": "Grumpier Old Men",
   "release_date": "1995-12-22T00:00:00+00:00",
-  "description": "A family wedding reignites the ancient feud between next-door neighbors and fishing buddies John and Max. Meanwhile, a sultry Italian divorcée opens a restaurant at the local bait shop, alarming the locals who worry she'll scare the fish away. But she's less interested in seafood than she is in cooking up a hot time with Max.",
+  "description": "",
   "average_rating": 0,
   "budget": 0,
   "box_office": 0,

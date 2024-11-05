@@ -63,6 +63,27 @@ def format_movie(movie_result : object, output : list[dict[str,any]]) -> None:
         # movie["demographic"] = info.demographic
         output.append(movie)
 
+@router.post("/{user_id}/add/{movie_id}")
+def user_add_movie(user_id : int, movie_id : int):
+    """
+    Record a movie a user has saved
+    """
+    # Add Check For Movie and User IDs To Ensure They Exists
+    with db.engine.begin() as connection:
+        sql_to_execute = """
+                            INSERT INTO 
+                                saved_movies (user_id, movie_id)
+                            VALUES 
+                                 (:user_id, :movie_id)
+                        """
+        try:
+            connection.execute(sqlalchemy.text(sql_to_execute), {"user_id":user_id, "movie_id":movie_id})
+        except sqlalchemy.exc.IntegrityError:
+            print("Already Saved Movie")
+    return {
+        "success":True
+    }
+
 @router.get("/{user_id}/list")
 def user_list(user_id : int):
     """
