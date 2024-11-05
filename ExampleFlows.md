@@ -4,12 +4,13 @@
 ##### Already watched from recommended movies
 
 ###### Taran
-Rupinder Singh logs in by making a POST request to `/users/login`. Rupinder then gets recommended a movie he as already watched, "Rupinder Gandhi 2: The Robinhood". He decideds to rate the movie a 10 out of 10 with a POST request to `/users/{id}/list/{movie_id}/rate` and then makes a POST request to `/movies/{id}/list/{movie_id}/` with that movie's id in the request URL. 
+Rupinder Singh logs in by making a POST request to `/users/login`. Rupinder then gets recommended movies where he likes "Toy Story" and decides to watch it. He decideds to rate the movie a 10 out of 10 with a POST request to `/users/{id}/list/{movie_id}/rate` and then makes a POST request to `/movies/{id}/list/{movie_id}/` with that movie's id in the request URL. 
 
 Rupinder starts by calling POST `/users/login` to log in.
 Then Rupinder calls GET `/recommendations/{user_id}` to get his recommended movies
 Rupinder calls POST `/users/{id}/list/{movie_id}/rate`  with the movie he has already seen.
 Finally, he then makes call to POST `/users/{id}/list/{movie_id}/watched`, where the movie_id is the id of the movie he has seen"
+
 
 #### GET A MOVIE TO WATCH TODAY
 Rakesh had a long day and wants to watch a movie. He is too tired to think of a movie. Rakesh first logs in by making a POST request to `/users/login`. He then makes a GET request to `/movies/user/{user_id}/` which returns a movie that he has not already watched, but has shown intrest in from past recomendations. Rakesh then deciedes to watch that movie. 
@@ -43,10 +44,3 @@ Kade Cabrera visits our website because she wants to find other movies based off
 First, Kade requests the catalog of movies to find what she has watched with `/catalog/movies`. 
 Kade rates movie, A, on her account with a POST request to `/users/{id}/list/{movie_id}/rate/` with a like and movie, B, with disklike. 
 Kade then receives recommendations with a GET `/recommend/{id}`
-    
-
-
-
-
-### To Implement later
-Jake is a a new user who wants to get a list of movies to look through. He is a new user, so He will call 

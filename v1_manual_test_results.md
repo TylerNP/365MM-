@@ -28,10 +28,9 @@ curl -X 'GET' \
   "movie_id": 3,
   "name": "Grumpier Old Men",
   "release_date": "1995-12-22T00:00:00+00:00",
-  "genres": "['Romance', 'Comedy']",
+  "description": "",
   "average_rating": 0,
   "budget": 0,
   "box_office": 0,
-  "demographic": "[]"
 }
 
