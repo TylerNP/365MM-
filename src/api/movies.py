@@ -31,9 +31,9 @@ def get_movie(movie_id : int):
     movie = {}
     result = None
     with db.engine.begin() as connection:
-        sql_to_execute = "SELECT name, release_date, description, average_rating, budget, box_office, duration FROM movies WHERE id = :movie_id"
+        sql_to_execute = "SELECT :movie_id AS id, name, release_date, description, average_rating, budget, box_office, duration FROM movies WHERE id = :movie_id"
         result = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
-        movie = format_movie(result, movie_id)
+        movie = format_movie(result)[-1]
     print(movie)
     return movie
 
@@ -83,11 +83,13 @@ def new_movie(new_movie : Movie):
         "movie_id":movie_id
     }
 
-@router.get("/available")
-def get_movie_available(streaming_service: str):
+
+@router.get("/available/")
+def get_movie_available(name : str):
     """
     Returns a list of available movies available in streaming service
     """
+    print(f"Service {name}")
     sql_to_execute = """SELECT 
                             movies.id, 
                             movies.name, 
@@ -99,25 +101,22 @@ def get_movie_available(streaming_service: str):
                             movies.duration 
                         FROM movies
                         JOIN available_streaming ON movies.id = available_streaming.movie_id
-                        JOIN streaming_services ON available_streaming.service_id = streaming_services.id
-                        WHERE streaming_services.name = :service
+                        JOIN streaming_services ON available_streaming.service_id = streaming_services.id 
+                            AND streaming_services.name = :service
                             """
-    service = {'service': streaming_service}
-
+    service = {'service': name}
+    movies = None
     with db.engine.begin() as connection:
-        movies_available = list(connection.execute(sqlalchemy.text(sql_to_execute), service))
-
-    for movie in movies_available:
-        m_id = movie.id 
-        movie = format_movie(movie, m_id)
-        print(movie)
-    return movie
+        movies_available = connection.execute(sqlalchemy.text(sql_to_execute), service)
+        movies = format_movie(movies_available)
+    return movies
 
 @router.get("/user/{user_id}")
 def get_movie_interested(user_id : int):
     """
     Gets a random movie that a user has not watched, empty if no movies available
     """
+    print(f"User: {user_id}")
     movie = {}
     with db.engine.begin() as connection:
         sql_to_execute = "SELECT users.id FROM users WHERE users.id = :user_id"
@@ -125,45 +124,45 @@ def get_movie_interested(user_id : int):
         if len(exsits) == 0:
             return movie
         sql_to_execute = """
-                            SELECT 
-                                movies.id, 
-                                movies.name, 
-                                movies.release_date,
-                                movies.description,
-                                movies.average_rating,
-                                movies.budget,
-                                movies.box_office, 
-                                movies.duration 
-                            FROM 
-                                movies
-                            WHERE NOT EXISTS (
-                                SELECT 1 
-                                FROM watched_movies 
-                                WHERE user_id = :user_id
-                                AND movie_id = movies.id
-                            ) 
-                            ORDER BY 
-                                RANDOM() 
-                            LIMIT 1
-                        """
+            SELECT 
+                movies.id, 
+                movies.name, 
+                movies.release_date,
+                movies.description,
+                movies.average_rating,
+                movies.budget,
+                movies.box_office, 
+                movies.duration 
+            FROM 
+                movies
+            WHERE NOT EXISTS (
+                SELECT 1 
+                FROM watched_movies 
+                WHERE user_id = :user_id
+                AND movie_id = movies.id
+            ) 
+            ORDER BY 
+                RANDOM() 
+            LIMIT 1
+        """
         results = list(connection.execute(sqlalchemy.text(sql_to_execute), {"user_id":user_id}))
         movie_id = 0
-        for result in results:
-            movie_id = result.id 
-        movie = format_movie(results, movie_id)
+        movie = format_movie(results)[-1]
         print(movie)
     return movie
 
-# Takes CursorResult Object And Converts into Movie Dictionary For Json
-def format_movie(movie_result : object, movie_id : int) -> dict[str, any]:
-    movie = {}
+# Takes CursorResult Object And Converts into a list of Movie Dictionary For Json
+def format_movie(movie_result : object) -> list[dict[str, any]]:
+    movies = []
     for info in movie_result:
-        movie["movie_id"] = movie_id
+        movie = {}
+        movie["movie_id"] = info.id
         movie["name"] = info.name
         movie["release_date"] = info.release_date
         movie["description"] = info.description
         movie["average_rating"] = info.average_rating
         movie["budget"] = info.budget
         movie["box_office"] = info.box_office
+        movies.append(movie)
         # movie["demographic"] = info.demographic
-    return movie
+    return movies
