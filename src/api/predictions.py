@@ -31,6 +31,7 @@ def create_prediction(movie_id : int):
     # COMPARE SIMILARITY (e.g. count how many of the same genres, compare movie length, etc)
     # Use some formula (e.g. movies with blank genres get an avg rating of 7, longer movies get lower reviews, etc)
     # Predict box_office, ratings, and views based off similarity
+
     sql_to_execute = """
         WITH search_genres AS (
             SELECT movie_genres.genre_id 
@@ -87,5 +88,67 @@ def create_prediction(movie_id : int):
     #  Rating_Total = 7*2 + 5*3
     #  Rating_Count = 2 + 3
     #  Rating_Avg = (14+15) / 5 -> 5.8
+
+
+    with db.engine.begin() as connection:
+        current_movie_genre = connection.execute(sqlalchemy.text("""SELECT movies.name, genres.name
+                                    FROM movies
+                                    JOIN movie_genres ON movies.id = movie_genres.movie_id
+                                    JOIN genres ON genres.id = movie_genres.genre_id
+                                    WHERE movies.id = :movie_id)
+                                    """), {'movie_id':movie_id}).mappings()
+        
+        result = connection.execute(sqlalchemy.text(sql_to_execute), {'movie_id': movie_id}).mappings() #movies to compare 
+
+    movie_count = 0 # number of movies
+    current_movie_genre = []
+    total_weighted_rating = 0
+    total_weighted_views = 0
+    total_weighted_box_office = 0 
+
+    for row in current_movie_genre:
+        current_movie_genre.append(row.name)
+    print(current_movie_genre)
+
+    
+    for movie in result:
+        #if any of the comparisons are null dont add to calculation
+        if movie.view == "NULL" or movie.avg == "NULL" or movie.box_office == "NULL":
+            continue
+
+        #uses the set().intersection() \we get its count by using len which is the weight
+        weight = len(set(movie.genres).intersection(current_movie_genre)) 
+
+        if weight == 0:
+            continue
+
+        total_weighted_views += movie.view * weight
+        total_weighted_rating += movie.avg * weight
+        total_weighted_box_office += movie.box_office * weight
+
+        movie_count += weight
+
+
+    if movie_count > 0:
+        prediction = {
+            "predicted_ratings": total_weighted_rating / movie_count,
+            "predicted_views": total_weighted_views / movie_count,
+            "box_office": total_weighted_box_office / movie_count,
+        }
+    else:
+        # if no movies match, set the prediction to 0 for all fields
+        prediction = {
+            "predicted_ratings": 0,
+            "predicted_views": 0,
+            "box_office": 0
+        }
+
+    sql_insert = """
+                INSERT INTO predictions
+                  (movie_id, predicted_ratings, predicted_views, box_office)
+                VALUES (:movie_id, :predicted_ratings, :predicted_views, :box_office)
+                """
+    with db.engine.begin() as connection:
+        connection.execute(sqlalchemy.text(sql_insert), prediction)
 
     return "OK"
