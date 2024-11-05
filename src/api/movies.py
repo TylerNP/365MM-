@@ -84,8 +84,34 @@ def new_movie(new_movie : Movie):
     }
 
 @router.get("/available")
-def get_movie_available():
-    return NotImplemented
+def get_movie_available(streaming_service: str):
+    """
+    Returns a list of available movies available in streaming service
+    """
+    sql_to_execute = """SELECT 
+                            movies.id, 
+                            movies.name, 
+                            movies.release_date,
+                            movies.description,
+                            movies.average_rating,
+                            movies.budget,
+                            movies.box_office, 
+                            movies.duration 
+                        FROM movies
+                        JOIN available_streaming ON movies.id = available_streaming.movie_id
+                        JOIN streaming_services ON available_streaming.service_id = streaming_services.id
+                        WHERE streaming_services.name = :service
+                            """
+    service = {'service': streaming_service}
+
+    with db.engine.begin() as connection:
+        movies_available = list(connection.execute(sqlalchemy.text(sql_to_execute), service))
+
+    for movie in movies_available:
+        m_id = movie.id 
+        movie = format_movie(movie, m_id)
+        print(movie)
+    return movie
 
 @router.get("/user/{user_id}")
 def get_movie_interested(user_id : int):
