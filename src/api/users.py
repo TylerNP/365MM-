@@ -80,6 +80,8 @@ def user_add_movie(user_id : int, movie_id : int):
             connection.execute(sqlalchemy.text(sql_to_execute), {"user_id":user_id, "movie_id":movie_id})
         except sqlalchemy.exc.IntegrityError:
             print("Already Saved Movie")
+        except sqlalchemy.exc.DataError:
+            raise HTTPException(status_code=400, detail="Malformed request")
     return {
         "success":True
     }

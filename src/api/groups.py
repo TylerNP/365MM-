@@ -155,9 +155,10 @@ def list_groups():
                     groups.id
             )
             SELECT 
+                groups.id,
                 groups.name, 
                 groups.description, 
-                members.members,
+                COALESCE(members.members, 0),
                 ARRAY_AGG(genres.name) AS interests
             FROM 
                 groups 
@@ -180,10 +181,11 @@ def list_groups():
     for value in result:
         groups.append(
             {
-                "name":value.name,
-                "description":value.description,
+                "group_id":value.id,
+                "group_name":value.name,
+                "group_description":value.description,
                 "members":value.members,
-                "interests":value.interests
+                "group_interests":value.interests
             }
         )
     return groups
