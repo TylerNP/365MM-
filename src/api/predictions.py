@@ -129,7 +129,9 @@ def create_prediction(movie_id : int):
                     """
         connection.execute(sqlalchemy.text(sql_insert), prediction)
 
-    return "OK"
+    return {
+        "success":True
+    }
 
 """ FOR LATER INSPECTION
         current_movie_genre = connection.execute(sqlalchemy.text(""

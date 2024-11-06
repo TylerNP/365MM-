@@ -381,7 +381,7 @@ Provides a list of the performance of the top 5 of either the most rated, most v
 
 ## 6. Predictions
 ### 6.1 Get Prediction - `/predictions/{movie_id}` (GET)
-Gets information about a prediction of a movie performance in respect with the box-office and viewing languages. <br />
+Gets information about a prediction of a movie performance in respect with the box-office and viewing languages (Must already be generated). <br />
 
 **Response**:
 
@@ -517,8 +517,9 @@ Shows all groups available. <br />
 ```json
 [
   {
+    "group_id": "integer",
     "group_name": "string",
-    "group_desciprtion": "string",
+    "group_description": "string",
     "members": "integer",
     "group_interests": ["string"]
   }
