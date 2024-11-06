@@ -21,7 +21,7 @@ curl -X 'GET' \
 2. `/recommendations/24`
 **Request**
 curl -X 'GET' \
-  'http://127.0.0.1:3000/recommendations/24' \
+  'https://three65mm.onrender.com/recommendations/24' \
   -H 'accept: application/json'
 
 **Response**
@@ -62,7 +62,7 @@ curl -X 'GET' \
 3. `/users/24/rate/1`
 **Request**
 curl -X 'POST' \
-  'http://127.0.0.1:3000/users/4/rate/1?rating=10' \
+  'https://three65mm.onrender.com/users/4/rate/1?rating=10' \
   -H 'accept: application/json' \
   -d ''
 
@@ -74,7 +74,7 @@ curl -X 'POST' \
 4. `/users/24/watch/1`
 **Request**
 curl -X 'POST' \
-  'http://127.0.0.1:3000/users/24/watch/1' \
+  'https://three65mm.onrender.com/users/24/watch/1' \
   -H 'accept: application/json' \
   -d ''
 
@@ -122,7 +122,7 @@ curl -X 'GET' \
 3. `/analytics/movies/3`
 **Request**
 curl -X 'GET' \
-  'http://127.0.0.1:3000/analytics/movies/3' \
+  'https://three65mm.onrender.com/analytics/movies/3' \
   -H 'accept: application/json'
 
 **Response**
@@ -146,7 +146,7 @@ Afterwards he checks the predictions on the movie with `/predictions/{movie_id}`
 1. `/catalog/search`
 **Request**
 curl -X 'GET' \
-  'http://127.0.0.1:3000/catalog/search?movie_name=Toy%20Story&search_page=1&sort_col=movie_name&sort_order=asc' \
+  'https://three65mm.onrender.com/catalog/search?movie_name=Toy%20Story&search_page=1&sort_col=movie_name&sort_order=asc' \
   -H 'accept: application/json'
 
 **Response**
@@ -171,7 +171,7 @@ curl -X 'GET' \
 2. `/users/25/add/1`
 **Request**
 curl -X 'POST' \
-  'http://127.0.0.1:3000/users/25/add/1' \
+  'https://three65mm.onrender.com/users/25/add/1' \
   -H 'accept: application/json' \
   -d ''
 
@@ -183,7 +183,7 @@ curl -X 'POST' \
 3. `/predictions/1`
 **Request**
 curl -X 'GET' \
-  'http://127.0.0.1:3000/predictions/1' \
+  'https://three65mm.onrender.com/predictions/1' \
   -H 'accept: application/json'
   
 **Response** 
@@ -202,7 +202,7 @@ First he signs in with a GET request to `/users/login`. Then, he looks for all t
 1. `/users/login`
 **Request**
 curl -X 'GET' \
-  'http://127.0.0.1:3000/users/login?username=taran' \
+  'https://three65mm.onrender.com/users/login?username=taran' \
   -H 'accept: application/json'
 
 **Response**
@@ -213,12 +213,13 @@ curl -X 'GET' \
 2. `/groups/list`
 **Request**
 curl -X 'GET' \
-  'http://127.0.0.1:3000/groups/list/' \
+  'https://three65mm.onrender.com/groups/list/' \
   -H 'accept: application/json'
 
 **Response**
 [
   {
+    "group_id": 1,
     "name": "group_1",
     "description": "not_used",
     "members": 2,
@@ -227,6 +228,7 @@ curl -X 'GET' \
     ]
   },
   {
+    "group_id": 2,
     "name": "group_2",
     "description": "test",
     "members": null,
@@ -239,7 +241,7 @@ curl -X 'GET' \
 3. `/admin/{user_id}/delete/group/{group_id}`
 **Request**
 curl -X 'POST' \
-  'http://127.0.0.1:3000/admin1/movies/delete/2' \
+  'https://three65mm.onrender.com/admin/1/movies/delete/2' \
   -H 'accept: application/json' \
   -d ''
 
