@@ -91,12 +91,14 @@ def get_genre_analytics(genre : str):
             sql_to_execute = """
                 WITH movie_in_genre AS (
                     SELECT
-                        movie_genres.movie_id
+                        movies.id AS movie_id, movies.name
                     FROM
-                        movie_genres
-                    WHERE movie_genres.genre_id = :genre_id
+                        movies
+                    JOIN 
+                        movie_genres ON movie_genres.movie_id = movies.id 
+                        AND movie_genres.genre_id = :genre_id
                     GROUP BY
-                        movie_genres.movie_id
+                        movies.id
                 ),
                 movie_views AS (
                     SELECT
@@ -242,6 +244,7 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
     movie_views = (
         sqlalchemy.select(
             db.movies.c.id.label("movie_id"),
+            db.movies.c.name.label("name"),
             sqlalchemy.func.count(db.watched_movies.c.movie_id).label("views")
         )
         .select_from(db.movies)
@@ -252,6 +255,7 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
     movie_ratings = (
         sqlalchemy.select(
             db.movies.c.id.label("movie_id"),
+            db.movies.c.name.label("name"),
             sqlalchemy.func.round(sqlalchemy.func.avg(db.ratings.c.rating), 1).label("movie_avg")
         )
         .select_from(db.movies)
@@ -262,6 +266,7 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
     movie_likes = (
         sqlalchemy.select(
             db.movies.c.id.label("movie_id"),
+            db.movies.c.name.label("name"),
             sqlalchemy.func.sum(sqlalchemy.case((db.liked_movies.c.liked == True, 1), else_=0)).label("total_likes")
         )
         .select_from(db.movies)
@@ -274,6 +279,7 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
         m = (
             sqlalchemy.select(
                 movie_views.c.movie_id.label("movie_id"),
+                movie_views.c.name.label("name"),
                 sqlalchemy.func.row_number().over(order_by=sqlalchemy.desc(movie_views.c.views)).label("rank")
             )
             .select_from(movie_views)
@@ -282,6 +288,7 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
         m = (
             sqlalchemy.select(
                 movie_ratings.c.movie_id.label("movie_id"),
+                movie_ratings.c.name.label("name"),
                 sqlalchemy.func.row_number().over(order_by=sqlalchemy.desc(movie_ratings.c.movie_avg)).label("rank")
             )
             .select_from(movie_ratings)
@@ -290,6 +297,7 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
         m = (
             sqlalchemy.select(
                 movie_likes.c.movie_id.label("movie_id"),
+                movie_likes.c.name.label("name"),
                 sqlalchemy.func.row_number().over(order_by=sqlalchemy.desc(movie_likes.c.total_likes)).label("rank")
             )
             .select_from(movie_likes)
@@ -299,6 +307,7 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
     stmt = (
         sqlalchemy.select(
             m.c.movie_id.label("movie_id"),
+            m.c.name.label("name"),
             m.c.rank.label("rank"),
             movie_views.c.views.label("views"),
             movie_ratings.c.movie_avg.label("movie_avg"),
@@ -321,6 +330,7 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
             movies.append(
                 {
                     "movie_id": row.movie_id,
+                    "movie_name": row.name,
                     "rank": row.rank,
                     "viewed": row.views,
                     "rated": row.movie_avg,
