@@ -171,7 +171,8 @@ def list_groups():
             GROUP BY
                 groups.name,
                 groups.description,
-                members.members
+                members.members,
+                groups.id
             ORDER BY 
                 groups.name
         """
