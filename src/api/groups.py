@@ -158,7 +158,7 @@ def list_groups():
                 groups.id,
                 groups.name, 
                 groups.description, 
-                COALESCE(members.members, 0),
+                COALESCE(members.members, 0) AS member,
                 ARRAY_AGG(genres.name) AS interests
             FROM 
                 groups 
@@ -185,7 +185,7 @@ def list_groups():
                 "group_id":value.id,
                 "group_name":value.name,
                 "group_description":value.description,
-                "members":value.members,
+                "members":value.member,
                 "group_interests":value.interests
             }
         )
