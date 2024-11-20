@@ -193,3 +193,9 @@ def user_like_movie(user_id : int, movie_id : int, like : bool):
     return {
         "success":True
     }
+
+@router.delete("/{user_id}", status_code = 204)
+def remove_user(user_id : int):
+    with db.engine.begin() as connection:
+        connection.execute(sqlalchemy.text("DELETE FROM users WHERE users.id = :user_id"), {"user_id":user_id})
+    return

@@ -44,19 +44,19 @@ def create_prediction(movie_id : int):
             JOIN search_genres ON movie_genres.genre_id = search_genres.genre_id
             WHERE movies.id != :movie_id
         ),
-            movie_ratings AS (
+        movie_ratings AS (
             SELECT movie_to_check.id, AVG(ratings.rating) AS avg
             FROM movie_to_check
             JOIN ratings ON movie_to_check.id = ratings.movie_id
             GROUP BY movie_to_check.id
         ),
-            movie_views AS (
+        movie_views AS (
             SELECT movie_to_check.id, COUNT(watched_movies.movie_id) AS view
             FROM movie_to_check
             JOIN watched_movies ON movie_to_check.id = watched_movies.movie_id
             GROUP BY movie_to_check.id
         ),
-            movie_rev AS (
+        movie_rev AS (
             SELECT movie_to_check.id, movies.box_office 
             FROM movie_to_check
             JOIN movies ON movie_to_check.id = movies.id AND box_office != 0

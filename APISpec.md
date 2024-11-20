@@ -187,6 +187,16 @@ Log a movie as watched or not. <br />
 }
 ```
 
+### 2.6 Remove user - `/users/{user_id}` (Delete)
+Remove a user from database. <br />
+
+**Response**:
+```json
+{
+
+}
+```
+
 ## 3. Catalog
 ### 3.1 Get Catalog - `/catalog/` (GET)
 Retrieves the catalog of movies. Each movie will only have one unique entry. <br />
