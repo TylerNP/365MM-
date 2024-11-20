@@ -149,19 +149,22 @@ def get_genre_analytics(genre : str):
                     ) AS m LIMIT 1
                 ),
                 filtered_ratings AS (
-                    SELECT high_ratings, low_ratings FROM (
-                    (SELECT FIRST_VALUE(movie_id) OVER (ORDER BY rank) AS high_ratings, FIRST_VALUE(movie_id) OVER (ORDER BY rank DESC) AS low_ratings
+                    SELECT 
+                        high_ratings, 
+                        low_ratings 
                     FROM (
-                        SELECT 
-                        m.movie_id, 
-                        m.rank 
+                        (SELECT FIRST_VALUE(movie_id) OVER (ORDER BY rank) AS high_ratings, FIRST_VALUE(movie_id) OVER (ORDER BY rank DESC) AS low_ratings
                         FROM (
-                        SELECT 
-                            movie_ratings.movie_id, 
-                            ROW_NUMBER() OVER (ORDER BY movie_ratings.movie_avg DESC) AS rank 
-                        FROM movie_ratings ) AS m
-                        ) AS temp
-                    LIMIT 1)
+                            SELECT 
+                            m.movie_id, 
+                            m.rank 
+                            FROM (
+                            SELECT 
+                                movie_ratings.movie_id, 
+                                ROW_NUMBER() OVER (ORDER BY movie_ratings.movie_avg DESC) AS rank 
+                            FROM movie_ratings ) AS m
+                            ) AS temp
+                        LIMIT 1)
                     ) AS done
                 ),
                 filtered_views AS (

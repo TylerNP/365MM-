@@ -4,6 +4,8 @@ from src.api import auth
 import sqlalchemy
 from src import database as db
 import random
+import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
 
 router = APIRouter(
     prefix = "/recommendations",
@@ -13,6 +15,61 @@ router = APIRouter(
 @router.get("/{user_id}")
 def get_recommended(user_id: int):
     with db.engine.begin() as connection:
+        # get 3-0 collabrative filtered items --> if they are good ones, then add them and get less genre recommended, else stick with genre
+        sql_to_execute = '''
+                                SELECT user_id, movie_id, rating FROM ratings
+                                ORDER BY user_id, rating    
+                        '''
+        users_ratings = list(connection.execute(sqlalchemy.text(sql_to_execute)))
+        df = pd.DataFrame(users_ratings, columns=["user_id", "movie_id", "rating"])
+        user_item_matrix = df.pivot(index="user_id", columns="movie_id", values="rating")
+        user_item_matrix.fillna(0, inplace=True)
+        user_similarity = cosine_similarity(user_item_matrix)
+        print(user_similarity)
+        user_similarity_df = pd.DataFrame(user_similarity, index=user_item_matrix.index, columns=user_item_matrix.index)
+
+        potential_movies = []
+        # if the user has rated something before
+        if user_id in user_item_matrix.index:
+            users_rating = user_item_matrix.loc[user_id]
+            similar_users = user_similarity_df[user_id] # for our user 
+            weighted_ratings = user_item_matrix.T.dot(similar_users) / similar_users.sum()
+            weighted_ratings = user_item_matrix.T.dot(similar_users) / similar_users.sum()
+            recomendations = weighted_ratings[users_rating == 0].sort_values(ascending=False).head(5)
+            recomendations = recomendations[weighted_ratings >= 2.5].index.to_numpy()
+            potential_movies = (recomendations)
+
+        to_append = []
+        for movie in potential_movies:
+            sql_to_execute = '''
+                SELECT
+                movies.id,
+                movies.name,
+                movies.release_date,
+                movies.description,
+                movies.average_rating,
+                movies.budget,
+                movies.box_office,
+                ARRAY_AGG( DISTINCT COALESCE( genres.name, 'N/A')) as genres,
+                ARRAY_AGG( DISTINCT COALESCE(movie_languages.language, 'N/A')) as languages
+                FROM
+                movies
+                JOIN movie_genres ON movies.id = movie_genres.movie_id 
+                JOIN genres ON movie_genres.genre_id = genres.id
+                LEFT JOIN movie_languages on movies.id = movie_languages.movie_id
+                WHERE movies.id = :movie_id
+                GROUP BY movies.id,
+                movies.name,
+                movies.release_date,
+                movies.description,
+                movies.average_rating,
+                movies.budget,
+                movies.box_office
+            '''
+            result = list(connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":int(movie)}))
+            to_append.append(format_movie(result[0]))
+
+        # genre recommended
         good_rating = 5
         # get top 3 genres for a user if they exist
         sql_to_execute = '''
@@ -92,7 +149,7 @@ def get_recommended(user_id: int):
                 recommended_movies += list(connection.execute(sqlalchemy.text(sql_to_execute), values))
 
         # map the recommended movies into proper format
-        return list(map(format_movie, recommended_movies))
+        return (list(map(format_movie, recommended_movies)) + to_append)
 
 def format_movie(movie_result) -> dict[str, any]:
     movie = {}
