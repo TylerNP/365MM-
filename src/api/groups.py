@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, root_validator
 #from src.api import auth
 import sqlalchemy
 from src import database as db
@@ -11,10 +11,19 @@ router = APIRouter(
 )
 
 class new_group(BaseModel):
-    group_name = "string"
-    group_description = "string"
-    group_inerests = ["string"]
-    group_scores = ["integer"]
+    group_name : str
+    group_description : str
+    group_interests : list[str]
+    group_scores : list[int]
+
+    @root_validator(pre=True)
+    def check_lengths(cls, values):
+        interests = values.get('group_interests', [])
+        scores = values.get('group_scores', [])
+        if len(interests) != len(scores):
+            print(len(interests), " | ", len(scores))
+            raise HTTPException(status_code=422, detail="Malformed data: group_interests and group_scores must be the same length")
+        return values
 
 @router.get("/{group_id}")
 def get_group_info(group_id : int):
@@ -60,8 +69,8 @@ def create_group(group : new_group, user_id : int):
     """
     Create a new group with the user as owner 
     """
-    if len(group.group_scores) != len(group.group_inerests):
-        raise HTTPException(status_code=400, detail="Invalid Format")
+    #if len(group.group_scores) != len(group.group_inerests):
+        #raise HTTPException(status_code=400, detail="Invalid Format")
     with db.engine.begin() as connection:
         try:
             sql_to_execute = "SELECT 1 FROM users WHERE users.id = :user_id"
@@ -69,11 +78,10 @@ def create_group(group : new_group, user_id : int):
             sql_to_execute = "INSERT INTO groups (name, description) VALUES (:name, :description) RETURNING groups.id"
             group_id = connection.execute(sqlalchemy.text(sql_to_execute), {"name":group.group_name, "description":group.group_description}).scalar_one()
         except sqlalchemy.exc.NoResultFound:
-            print("No user to create group from")
-            return {}
+            raise HTTPException(status_code=404, detail="User does not exist")
         except sqlalchemy.exc.IntegrityError:
-            print("Group name already exists")
-            return {}
+            raise HTTPException(status_code=409, detail="Group name already exists")
+        # Fix to ensure genres Actual EXIST 
         sql_to_execute = """
             INSERT INTO 
                 liked_genres_groups (group_id, genre_id, score) 
@@ -83,9 +91,10 @@ def create_group(group : new_group, user_id : int):
                 match.score
             FROM 
                 genres 
-            JOIN (SELECT UNNEST(:genres) AS name, UNNEST(:scores)::int AS score) AS match ON genres.name = match.name
+            JOIN 
+                (SELECT UNNEST(:genres) AS name, UNNEST(:scores) AS score) AS match ON genres.name = match.name
         """
-        connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "genres":group.group_inerests, "scores":group.group_scores})
+        connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "genres":group.group_interests, "scores":group.group_scores})
         sql_to_execute = "INSERT INTO groups_joined (user_id, group_id, role) VALUES (:user_id, :group_id, 'Owner')"
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
     return {"group_id":group_id}
@@ -158,7 +167,7 @@ def list_groups():
                 groups.id,
                 groups.name, 
                 groups.description, 
-                COALESCE(members.members, 0),
+                COALESCE(members.members, 0) AS member,
                 ARRAY_AGG(genres.name) AS interests
             FROM 
                 groups 
@@ -171,7 +180,8 @@ def list_groups():
             GROUP BY
                 groups.name,
                 groups.description,
-                members.members
+                members.members,
+                groups.id
             ORDER BY 
                 groups.name
         """
@@ -184,7 +194,7 @@ def list_groups():
                 "group_id":value.id,
                 "group_name":value.name,
                 "group_description":value.description,
-                "members":value.members,
+                "members":value.member,
                 "group_interests":value.interests
             }
         )
