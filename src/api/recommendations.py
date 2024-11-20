@@ -6,6 +6,7 @@ from src import database as db
 import random
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
+from src.api.utils import format_movie_with_agg
 
 router = APIRouter(
     prefix = "/recommendations",
@@ -67,7 +68,7 @@ def get_recommended(user_id: int):
                 movies.box_office
             '''
             result = list(connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":int(movie)}))
-            to_append.append(format_movie(result[0]))
+            to_append.append(format_movie_with_agg(result[0]))
 
         # genre recommended
         good_rating = 5
@@ -149,20 +150,7 @@ def get_recommended(user_id: int):
                 recommended_movies += list(connection.execute(sqlalchemy.text(sql_to_execute), values))
 
         # map the recommended movies into proper format
-        return (list(map(format_movie, recommended_movies)) + to_append)
-
-def format_movie(movie_result) -> dict[str, any]:
-    movie = {}
-    movie["movie_id"] = movie_result[0]
-    movie["name"] = movie_result[1]
-    movie["release_date"] = movie_result[2]
-    movie["description"] = movie_result[3]
-    movie["average_rating"] = movie_result[4]
-    movie["budget"] = movie_result[5]
-    movie["box_office"] = movie_result[6]
-    movie["genre"] = movie_result[7]
-    movie["language"] = movie_result[8]
-    return movie
+        return (list(map(format_movie_with_agg, recommended_movies)) + to_append)
 
             
 

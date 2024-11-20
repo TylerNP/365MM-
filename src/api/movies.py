@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from src import database as db
 import sqlalchemy
+from src.api.utils import format_movies
 
 router = APIRouter(
     prefix = "/movies",
@@ -33,7 +34,7 @@ def get_movie(movie_id : int):
     with db.engine.begin() as connection:
         sql_to_execute = "SELECT :movie_id AS id, name, release_date, description, average_rating, budget, box_office, duration FROM movies WHERE id = :movie_id"
         result = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
-        movie = format_movie(result)[-1]
+        movie = format_movies(result)[-1]
     print(movie)
     return movie
 
@@ -108,7 +109,7 @@ def get_movie_available(name : str):
     movies = None
     with db.engine.begin() as connection:
         movies_available = connection.execute(sqlalchemy.text(sql_to_execute), service)
-        movies = format_movie(movies_available)
+        movies = format_movies(movies_available)
     return movies
 
 @router.get("/user/{user_id}")
@@ -147,22 +148,7 @@ def get_movie_interested(user_id : int):
         """
         results = list(connection.execute(sqlalchemy.text(sql_to_execute), {"user_id":user_id}))
         movie_id = 0
-        movie = format_movie(results)[-1]
+        movie = format_movies(results)[-1]
         print(movie)
     return movie
 
-# Takes CursorResult Object And Converts into a list of Movie Dictionary For Json
-def format_movie(movie_result : object) -> list[dict[str, any]]:
-    movies = []
-    for info in movie_result:
-        movie = {}
-        movie["movie_id"] = info.id
-        movie["name"] = info.name
-        movie["release_date"] = info.release_date
-        movie["description"] = info.description
-        movie["average_rating"] = info.average_rating
-        movie["budget"] = info.budget
-        movie["box_office"] = info.box_office
-        movies.append(movie)
-        # movie["demographic"] = info.demographic
-    return movies

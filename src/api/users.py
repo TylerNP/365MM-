@@ -49,19 +49,6 @@ def user_login(username : str):
         "user_id":user_id
     }
 
-# Takes CursorResult Object And Creates A List of Dictionaries For JSON 
-def format_movie(movie_result : object, output : list[dict[str,any]]) -> None:
-    for info in movie_result:
-        movie = {}
-        movie["movie_id"] = info.id
-        movie["name"] = info.name
-        movie["release_date"] = info.release_date
-        movie["description"] = info.description
-        movie["average_rating"] = info.average_rating
-        movie["budget"] = info.budget
-        movie["box_office"] = info.box_office
-        # movie["demographic"] = info.demographic
-        output.append(movie)
 
 @router.post("/{user_id}/add/{movie_id}")
 def user_add_movie(user_id : int, movie_id : int):
