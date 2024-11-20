@@ -135,6 +135,8 @@ def user_rate_movie(user_id : int, movie_id : int, rating : int):
     Rate a movie for a specific user
     """
     # Add Check For Movie and User IDs To Ensure They Exists
+    if rating < 0 or rating > 10:
+        raise HTTPException(status_code=400, detail="Rating must be between 0 to 10")
     with db.engine.begin() as connection:
         sql_to_execute = """
                             INSERT INTO 
