@@ -18,7 +18,7 @@ Create_prediction first reads if any prediction currently exists for a given mov
 
 ![iamge](https://github.com/TylerNP/365MM-/blob/main/images/CSC%20365_%20Template%20Sequence%20diagram.png)
 
-A solution to this, is to set this transaction to serializable.# Concurrency
+A solution to this, is to set this transaction to serializable.
 
 ---
 ### 3. Dirty Read ###
