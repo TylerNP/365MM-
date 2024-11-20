@@ -6,7 +6,7 @@
 
 Transaction A calls create_group which first checks if the user provided exists and then creates a new group and inserts into a groups_joined table which marks the user as the owner of the new group. Transaction B calls delete_user on the same user concurrently with Transaction A. This can cause Transaction A to determine that the user exists and creates a new group. Then, Transaction B removes the user. Finally, Transaction A inserts the non-existant user as the group owner. 
 
-![Lost Update Create Group](Images/ownerless_group_concurrency_diagram.png)
+![image](https://github.com/TylerNP/365MM-/blob/main/images/ownerless_group_concurrency_diagram.png)
 
 A solution to this, is to acquire a row-level lock at least at a FOR SHARE level to ensure that no transactions performing delete (B) can occurs until the current transaction (A) is complete. 
 
@@ -15,6 +15,8 @@ A solution to this, is to acquire a row-level lock at least at a FOR SHARE level
 ## Lost Update
 
 Create_prediction first reads if any prediction currently exists for a given movie, then creates a new prediction and insert it into the predictions table. So, if Transaction A and Transaction B both call create_prediction concurrenctly both transactions will read that no prediction has been created and create two predictions that is inserted into the prediction table. 
+
+![iamge](https://github.com/TylerNP/365MM-/blob/main/images/CSC%20365_%20Template%20Sequence%20diagram.png)
 
 A solution to this, is to set this transaction to serializable.# Concurrency
 
