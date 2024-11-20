@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from src.api import auth
 from enum import Enum
+import math
 import sqlalchemy
 from src import database as db
 
@@ -35,14 +36,14 @@ def create_prediction(movie_id : int):
         WITH search_genres AS (
             SELECT movie_genres.genre_id 
             FROM movie_genres 
-            WHERE movie_genres.movie_id = 24
+            WHERE movie_genres.movie_id = :movie_id
         ),
         movie_to_check AS (
             SELECT movies.id, movies.duration, EXTRACT(YEAR FROM movies.release_date) "year", EXTRACT(MONTH FROM movies.release_date) "month"
             FROM movies 
             JOIN movie_genres ON movies.id = movie_genres.movie_id 
             JOIN search_genres ON movie_genres.genre_id = search_genres.genre_id
-            WHERE movies.id != 24
+            WHERE movies.id != :movie_id
         ),
         movie_ratings AS (
             SELECT movie_to_check.id, AVG(ratings.rating) AS avg
@@ -112,11 +113,12 @@ def create_prediction(movie_id : int):
             duration = value.duration
         
         result = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
+        movie_vector = [3*len(genres), float(duration/15), float(year/1000), float(year%100/10), float(month/3)]
+        movie_vector = normalize_vector(movie_vector)
 
         for values in result:
-            # Improve Similarity and Weight Calculation
-            similarity = 0
-            score_vector = [0,0,0]
+            # Improve Similarity Calculation
+            score_vector = [0]*len(movie_vector)
             genre_value = 0
             for genre in genres:
                 try:
@@ -124,26 +126,33 @@ def create_prediction(movie_id : int):
                 except ValueError:
                     genre_value -= 0.25
                     continue
-                genre_value += 1
-            weight = round(100*similarity/len(values.genres))
-            score_vector[0] = weight*genre_value
-            score_vector[1] = abs(duration-values.duration) // 15
-            score_vector[2] = abs(year-values.year)//10 + abs(month//3 - values.month//3)
+                genre_value += 3
+
+            score_vector[0] = genre_value
+            score_vector[1] = float(values.duration/15)
+            score_vector[2] = float(values.year/1000)
+            score_vector[3] = float(values.year%100/10)
+            score_vector[4] = float(values.month/3)
+            score_vector = normalize_vector(score_vector)
+
+            similarity = sum(score_vector[i]*movie_vector[i] for i in range(len(movie_vector)))
+            #print(similarity)
+
             if values.view:
-                num_view_count += weight 
-                views_total += weight * values.view
+                num_view_count += similarity
+                views_total += similarity * float(values.view)
             if values.avg:
-                rating_count += weight
-                ratings_total += weight * values.avg
+                rating_count += similarity
+                ratings_total += similarity * float(values.avg)
             if values.box_office:
-                num_box_office_count += weight
-                box_office_total += weight * values.box_office
+                num_box_office_count += similarity
+                box_office_total += similarity * float(values.box_office)
 
         prediction = {
             "movie_id":movie_id,
-            "predicted_ratings": ratings_total/rating_count,
-            "predicted_views": views_total/num_view_count,
-            "box_office": box_office_total/num_box_office_count
+            "predicted_ratings": ratings_total/rating_count if rating_count>0 else None,
+            "predicted_views": views_total/num_view_count  if num_view_count>0 else None,
+            "box_office": box_office_total/num_box_office_count  if num_box_office_count>0 else None
         }
         sql_insert = """
                     INSERT INTO predictions
@@ -155,6 +164,11 @@ def create_prediction(movie_id : int):
     return {
         "success":True
     }
+
+def normalize_vector(vector : list[int]) -> list[int]:
+    length = math.sqrt(sum(value*value for value in vector))
+    return [value/length for value in vector]
+    
 
 """ FOR LATER INSPECTION
         current_movie_genre = connection.execute(sqlalchemy.text(""
