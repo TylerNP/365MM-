@@ -21,7 +21,7 @@ Create_prediction first reads if any prediction currently exists for a given mov
 A solution to this, is to set this transaction to serializable.# Concurrency
 
 ---
-### 1. Dirty Read ###
+### 3. Dirty Read ###
 **Scenario**:
 * T1 starts to update the average_rating of a movie in the movies table.
 * T2 reads the average_rating before T1 commits.
