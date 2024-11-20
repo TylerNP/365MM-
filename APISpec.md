@@ -218,7 +218,7 @@ Retrieves the catalog of movies. Each movie will only have one unique entry. <br
 ]
 ```
 
-### 3.2 Find Specific Movies - `/catalog/search, tags=["SEARCH"]` (GET)
+### 3.2 Find Specific Movies - `/catalog/search, tags=["SEARCH"]` (GET) (Complex Endpoint)
 Searches for movies based off querry parameters <br />
 
 **Querry Parameters**:
@@ -247,7 +247,7 @@ The API responds with a JSON object with the following:
   - `movie_average_rating`: An integer holding the average rating of the movie
 
 ## 4. Recommendations
-### 4.1 Get Recommendations - `/recommend/{user_id}` (GET)
+### 4.1 Get Recommendations - `/recommend/{user_id}` (GET) (Complex Endpoint)
 Creates a reocmmendation list based off user prefences (likes/dislikes) <br />
 
 **Response**:
@@ -390,7 +390,7 @@ Provides a list of the performance of the top 5 of either the most rated, most v
 ```
 
 ## 6. Predictions
-### 6.1 Get Prediction - `/predictions/{movie_id}` (GET)
+### 6.1 Get Prediction - `/predictions/{movie_id}` (GET) (Complex Endpoint)
 Gets information about a prediction of a movie performance in respect with the box-office and viewing languages (Must already be generated). <br />
 
 **Response**:
