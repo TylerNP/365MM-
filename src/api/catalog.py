@@ -31,10 +31,10 @@ async def search_movies(
     year: int = None,
     rating: int = None,
     search_page: int = 1,
+    limit: int = 10,
     sort_col: SearchSortOptions = SearchSortOptions.movie_name,
     sort_order: SearchSortOrder = SearchSortOrder.asc,
 ):
-    limit = 10
     offset = (search_page - 1) * limit
     
     # Define ordering based on sort_col
@@ -63,7 +63,7 @@ async def search_movies(
             db.movies.c.id.label("movie_id"),
             db.movies.c.name.label("movie_name"),
             db.movies.c.release_date.label("movie_release_year"),
-            db.movies.c.average_rating.label("movie_average_rating"),
+            sqlalchemy.func.coalesce(db.movies.c.average_rating,0).label("movie_average_rating"),
             sqlalchemy.func.array_agg(db.genres.c.name).label("movie_genre")
         )
         .select_from(db.movies)
