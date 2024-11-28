@@ -69,8 +69,7 @@ def create_group(group : new_group, user_id : int):
     """
     Create a new group with the user as owner 
     """
-    #if len(group.group_scores) != len(group.group_inerests):
-        #raise HTTPException(status_code=400, detail="Invalid Format")
+
     with db.engine.begin() as connection:
         try:
             sql_to_execute = "SELECT 1 FROM users WHERE users.id = :user_id"
@@ -81,7 +80,6 @@ def create_group(group : new_group, user_id : int):
             raise HTTPException(status_code=404, detail="User does not exist")
         except sqlalchemy.exc.IntegrityError:
             raise HTTPException(status_code=409, detail="Group name already exists")
-        # Fix to ensure genres Actual EXIST 
         sql_to_execute = """
             INSERT INTO 
                 liked_genres_groups (group_id, genre_id, score) 
@@ -93,8 +91,12 @@ def create_group(group : new_group, user_id : int):
                 genres 
             JOIN 
                 (SELECT UNNEST(:genres) AS name, UNNEST(:scores) AS score) AS match ON genres.name = match.name
+            RETURNING id
         """
-        connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "genres":group.group_interests, "scores":group.group_scores})
+        results = connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "genres":group.group_interests, "scores":group.group_scores})
+        ids = [result.id for result in results]
+        if len(ids) < len(group.group_interests):
+            raise HTTPException(status_code=422, detail="interests must match genres in database")
         sql_to_execute = "INSERT INTO groups_joined (user_id, group_id, role) VALUES (:user_id, :group_id, 'Owner')"
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
     return {"group_id":group_id}
@@ -109,10 +111,9 @@ def join_group(group_id : int, user_id : int):
         try:
             connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
         except sqlalchemy.exc.IntegrityError:
-            print("Already a member of this group")
-    return {"success":True}
+            raise HTTPException(status_code=409, detail="user already a member of this group")
 
-@router.post("/{group_id}/remove/")
+@router.delete("/{group_id}/user/{user_id}")
 def remove_from_group(group_id : int, user_id : int):
     """
     Remove a user form a group
@@ -120,9 +121,9 @@ def remove_from_group(group_id : int, user_id : int):
     with db.engine.begin() as connection:
         sql_to_execute = "DELETE FROM groups_joined WHERE group_id = :group_id AND user_id = :user_id"
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
-    return {"success":True}
+    return HTTPException(status_code=410, detail="Removed user")
 
-@router.post("/{group_id}/delete/")
+@router.delete("/{group_id}/")
 def delete_group(group_id : int, user_id : int):
     """
     Delete a group (only owners can)
@@ -140,9 +141,8 @@ def delete_group(group_id : int, user_id : int):
         except sqlalchemy.exc.NoResultFound:
             raise HTTPException(status_code=403, detail="Invalid Authorization")
         sql_to_execute = "DELETE FROM groups WHERE groups.id = :group_id"
-        print(sql_to_execute)
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id})
-    return {"success":True}
+    return HTTPException(status_code=410, detail="Removed group")
 
 @router.get("/list/")
 def list_groups():
