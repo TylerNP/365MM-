@@ -21,7 +21,7 @@ class search_sort_order(str, Enum):
     asc = "asc"
     desc = "desc"   
 
-@router.get("/search/")
+#@router.get("/movies/search/")
 def search_orders(
     movie_name : str = "",
     budget : int = 0,
@@ -58,9 +58,9 @@ def get_movie_analytics(movie_id : int):
             SELECT 
                 (SELECT COUNT(user_id) FROM watched_movies WHERE movie_id = :movie_id) AS views, 
                 (SELECT COUNT(user_id) FROM ratings WHERE movie_id = :movie_id) AS rated, 
-                (SELECT AVG(rating) FROM ratings WHERE movie_id = :movie_id) AS rating,
-                (SELECT count FROM perception WHERE likes = True) AS liked, 
-                (SELECT count FROM perception WHERE likes = False) AS disliked
+                COALESCE((SELECT AVG(rating) FROM ratings WHERE movie_id = :movie_id), 0) AS rating,
+                COALESCE((SELECT count FROM perception WHERE likes = True), 0) AS liked, 
+                COALESCE((SELECT count FROM perception WHERE likes = False), 0) AS disliked
             """
         results = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
         for result in results:
@@ -185,14 +185,14 @@ def get_genre_analytics(genre : str):
                 )
 
                 SELECT
-                    ROUND(AVG(movie_views.views), 1)::real  AS avg_views,
-                    ROUND(AVG(movie_ratings.movie_avg), 1)::real  AS avg_ratings,
-                    ROUND(AVG(movie_likeness.total_likes), 1)::real AS avg_likes,
-                    ROUND(AVG(movie_likeness.total_dislikes), 1)::real AS avg_dislikes,
-                    MAX(movie_views.views) AS most_views,
-                    MAX(movie_ratings.movie_avg)::real AS highest_rating,
-                    MIN(movie_views.views) AS least_views,
-                    MIN(movie_ratings.movie_avg)::real AS lowest_rating,
+                    COALESCE(ROUND(AVG(movie_views.views), 1)::real,0)  AS avg_views,
+                    COALESCE(ROUND(AVG(movie_ratings.movie_avg), 1)::real,0)  AS avg_ratings,
+                    COALESCE(ROUND(AVG(movie_likeness.total_likes), 1)::real,0) AS avg_likes,
+                    COALESCE(ROUND(AVG(movie_likeness.total_dislikes), 1)::real,0) AS avg_dislikes,
+                    COALESCE(MAX(movie_views.views),0) AS most_views,
+                    COALESCE(MAX(movie_ratings.movie_avg)::real,0) AS highest_rating,
+                    COALESCE(MIN(movie_views.views),0) AS least_views,
+                    COALESCE(MIN(movie_ratings.movie_avg)::real,0) AS lowest_rating,
                     (SELECT high_ratings FROM filtered_ratings) AS highest_rated_movie,
                     (SELECT low_ratings FROM filtered_ratings) AS lowest_rated_movie,
                     (SELECT high FROM filtered_views) AS highest_viewed_movie,
@@ -213,8 +213,20 @@ def get_genre_analytics(genre : str):
         
     genre = {}
     for values in result:
-        if all(value == None for value in values):
-            return genre
+        ids = [
+            values.highest_rated_movie,
+            values.lowest_rated_movie,
+            values.highest_viewed_movie,
+            values.lowest_viewed_movie
+        ]
+
+        # highest and lowest results are guranteed to either be both defined or not
+        movie_ids = []
+        for id in ids:
+            if id == None:
+                continue
+            movie_ids.append(id)
+        
         genre = {
             "average_views": values.avg_views,
             "average_rating": values.avg_ratings,
@@ -224,12 +236,7 @@ def get_genre_analytics(genre : str):
             "highest_rating": values.highest_rating,
             "least_views": values.least_views,
             "lowest_rating": values.lowest_rating,
-            "movie_ids": [
-                values.highest_rated_movie,
-                values.lowest_rated_movie,
-                values.highest_viewed_movie,
-                values.lowest_viewed_movie
-            ] 
+            "movie_ids": movie_ids
         }
     return genre
 
@@ -239,7 +246,7 @@ class SearchOptions(str, Enum):
     liked = "liked"
 
 
-@router.get("/popular")
+@router.get("/movies/popular")
 def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
     """
     Get the top 5 movies by ratings, views, or likes
@@ -312,9 +319,9 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
             m.c.movie_id.label("movie_id"),
             m.c.name.label("name"),
             m.c.rank.label("rank"),
-            movie_views.c.views.label("views"),
-            movie_ratings.c.movie_avg.label("movie_avg"),
-            movie_likes.c.total_likes.label("likes")
+            sqlalchemy.func.coalesce(movie_views.c.views, 0).label("views"),
+            sqlalchemy.func.coalesce(movie_ratings.c.movie_avg, 0).label("movie_avg"),
+            sqlalchemy.func.coalesce(movie_likes.c.total_likes, 0).label("likes")
         )
         .select_from(m)
         .join(movie_views, m.c.movie_id == movie_views.c.movie_id, isouter=True)
