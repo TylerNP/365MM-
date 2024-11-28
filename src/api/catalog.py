@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from pydantic import BaseModel
 from src.api import auth
 import sqlalchemy
@@ -35,6 +35,10 @@ async def search_movies(
     sort_col: SearchSortOptions = SearchSortOptions.movie_name,
     sort_order: SearchSortOrder = SearchSortOrder.asc,
 ):
+    if limit < 1:
+        raise HTTPException(status_code=422, detail="limit must be a positive number greater than zero")
+    elif search_page < 1:
+        raise HTTPException(status_code=422, detail="search_page must be a positive number greater than zero")
     offset = (search_page - 1) * limit
     
     # Define ordering based on sort_col
