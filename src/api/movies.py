@@ -32,11 +32,13 @@ def get_movie(movie_id : int):
     movie = {}
     result = None
     with db.engine.begin() as connection:
-        sql_to_execute = "SELECT :movie_id AS id, name, release_date, description, average_rating, budget, box_office, duration FROM movies WHERE id = :movie_id"
+        sql_to_execute = "SELECT :movie_id AS id, name, release_date, description, COALESCE(average_rating, 0) AS average_rating, budget, box_office, duration FROM movies WHERE id = :movie_id"
         result = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
-        movie = format_movies(result)[-1]
+        movie = format_movies(result)
+        if not movie:
+            raise HTTPException(status_code=404, detail="No movie found")
     print(movie)
-    return movie
+    return movie[-1]
 
 @router.post("/new/")
 def new_movie(new_movie : Movie):
@@ -76,10 +78,10 @@ def new_movie(new_movie : Movie):
             connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id, "languages":new_movie.language})
         except KeyError:
             print("No Such Genre Exists")
-            return ()
+            raise HTTPException(status_code=400, detail="Genre does not exist")
         except sqlalchemy.exc.IntegrityError:
             print("Movie Already Exists")
-            return {}
+            raise HTTPException(status_code=409, detail="Movie already exists")
     return {
         "movie_id":movie_id
     }
@@ -112,7 +114,7 @@ def get_movie_available(name : str):
         movies = format_movies(movies_available)
     return movies
 
-@router.get("/user/{user_id}")
+@router.get("/random/user/{user_id}")
 def get_movie_interested(user_id : int):
     """
     Gets a random movie that a user has not watched, empty if no movies available
@@ -121,16 +123,17 @@ def get_movie_interested(user_id : int):
     movie = {}
     with db.engine.begin() as connection:
         sql_to_execute = "SELECT users.id FROM users WHERE users.id = :user_id"
-        exsits = list(connection.execute(sqlalchemy.text(sql_to_execute), {"user_id": user_id}))
-        if len(exsits) == 0:
-            return movie
+        try:
+            connection.execute(sqlalchemy.text(sql_to_execute), {"user_id": user_id}).scalar_one()
+        except sqlalchemy.exc.NoResultFound:
+            raise HTTPException(status_code=404, detail="User not found")
         sql_to_execute = """
             SELECT 
                 movies.id, 
                 movies.name, 
                 movies.release_date,
                 movies.description,
-                movies.average_rating,
+                COALESCE(movies.average_rating, 0) AS average_rating,
                 movies.budget,
                 movies.box_office, 
                 movies.duration 
@@ -147,7 +150,7 @@ def get_movie_interested(user_id : int):
             LIMIT 1
         """
         results = list(connection.execute(sqlalchemy.text(sql_to_execute), {"user_id":user_id}))
-        movie_id = 0
+        #movie_id = 0
         movie = format_movies(results)[-1]
         print(movie)
     return movie

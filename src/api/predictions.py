@@ -20,13 +20,14 @@ def get_prediction(movie_id : int):
             results = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
         except sqlalchemy.exc.NoResultFound:
             print("No prediction yet")
+            raise HTTPException(status_code=404, detail="No prediction found, prediction must first be generated")
         for result in results:
             prediction["predicted_ratings"] = result.predicted_ratings
             prediction["predicted_views"] = result.predicted_views
             prediction["box_office"] = result.box_office
     return prediction
 
-@router.post("/generate/")
+@router.post("/generate/{movie_id}")
 def create_prediction(movie_id : int):
     """
     Attempt to predict the performance of a movie (with respect to 365MM)
@@ -91,7 +92,7 @@ def create_prediction(movie_id : int):
         result = connection.execute(sqlalchemy.text("SELECT 1 FROM predictions WHERE predictions.movie_id = :movie_id"), {"movie_id":movie_id})
         for _ in result:
             print("Movie Prediction Already Generated")
-            return "OK"
+            raise HTTPException(status_code=409, detail="Movie prediction already generated")
         try:
             result = connection.execute(sqlalchemy.text("""
                 SELECT movies.duration, EXTRACT(YEAR FROM movies.release_date) "year", 

@@ -121,7 +121,7 @@ def remove_from_group(group_id : int, user_id : int):
     with db.engine.begin() as connection:
         sql_to_execute = "DELETE FROM groups_joined WHERE group_id = :group_id AND user_id = :user_id"
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
-    return HTTPException(status_code=410, detail="Removed user")
+    return HTTPException(status_code=200, detail="Removed user")
 
 @router.delete("/{group_id}/")
 def delete_group(group_id : int, user_id : int):
@@ -142,7 +142,7 @@ def delete_group(group_id : int, user_id : int):
             raise HTTPException(status_code=403, detail="Invalid Authorization")
         sql_to_execute = "DELETE FROM groups WHERE groups.id = :group_id"
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id})
-    return HTTPException(status_code=410, detail="Removed group")
+    return HTTPException(status_code=200, detail="Removed group")
 
 @router.get("/list/")
 def list_groups():

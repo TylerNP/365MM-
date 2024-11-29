@@ -29,12 +29,8 @@ def user_signup(new_user : user):
             connection.execute(sqlalchemy.text(sql_to_execute), {"username":new_user.username})
         except sqlalchemy.exc.IntegrityError:
             print("Username Already Exists")
-            return {
-                "success":False,
-            }
-    return {
-        "success":True
-    }
+            raise HTTPException(status_code=409, detail="Username already in use")
+    return HTTPException(status_code=201, detail="New user added")
 
 @router.get("/login")
 def user_login(username : str):
@@ -67,11 +63,10 @@ def user_add_movie(user_id : int, movie_id : int):
             connection.execute(sqlalchemy.text(sql_to_execute), {"user_id":user_id, "movie_id":movie_id})
         except sqlalchemy.exc.IntegrityError:
             print("Already Saved Movie")
+            raise HTTPException(status_code=409, detail="Movie Already in list")
         except sqlalchemy.exc.DataError:
             raise HTTPException(status_code=400, detail="Malformed request")
-    return {
-        "success":True
-    }
+    return HTTPException(status_code=201, detail="Movie added to user list")
 
 @router.get("/{user_id}/list")
 def user_list(user_id : int):
@@ -125,6 +120,7 @@ def user_rate_movie(user_id : int, movie_id : int, rating : int):
     if rating < 1 or rating > 10:
         raise HTTPException(status_code=400, detail="Rating must be between 1 to 10")
     with db.engine.begin() as connection:
+        validate_user_movie_ids(user_id, movie_id, connection)
         sql_to_execute = """
                             INSERT INTO 
                                 ratings (user_id, movie_id, rating)
@@ -136,9 +132,8 @@ def user_rate_movie(user_id : int, movie_id : int, rating : int):
         except sqlalchemy.exc.IntegrityError:
             # ? To-Do Update query instead
             print("Already Rated Movie")
-    return {
-        "success":True
-    }
+            raise HTTPException(status_code=409, detail="Movie Already Rated")
+    return HTTPException(status_code=201, detail="Movie rated")
 
 @router.post("/{user_id}/watch/{movie_id}")
 def user_watched_movie(user_id : int, movie_id : int):
@@ -147,6 +142,7 @@ def user_watched_movie(user_id : int, movie_id : int):
     """
     # Add Check For Movie and User IDs To Ensure They Exists
     with db.engine.begin() as connection:
+        validate_user_movie_ids(user_id, movie_id, connection)
         sql_to_execute = """
                             INSERT INTO 
                                 watched_movies (user_id, movie_id)
@@ -157,9 +153,8 @@ def user_watched_movie(user_id : int, movie_id : int):
             connection.execute(sqlalchemy.text(sql_to_execute), {"user_id":user_id, "movie_id":movie_id})
         except sqlalchemy.exc.IntegrityError:
             print("Already Watched Movie")
-    return {
-        "success":True
-    }
+            raise HTTPException(status_code=409, detail="Movie Already Watched")
+    return HTTPException(status_code=201, detail="Movie watched")
 
 @router.post("/{user_id}/like/{movie_id}")
 def user_like_movie(user_id : int, movie_id : int, like : bool):
@@ -168,6 +163,7 @@ def user_like_movie(user_id : int, movie_id : int, like : bool):
     """
     # Add Check For Movie and User IDs To Ensure They Exists
     with db.engine.begin() as connection:
+        validate_user_movie_ids(user_id, movie_id, connection)
         sql_to_execute = """
                             INSERT INTO 
                                 liked_movies (user_id, movie_id, liked)
@@ -179,12 +175,21 @@ def user_like_movie(user_id : int, movie_id : int, like : bool):
         except sqlalchemy.exc.IntegrityError:
             # ? To-Do Update query instead
             print("Already Rated Movie")
-    return {
-        "success":True
-    }
+            raise HTTPException(status_code=409, detail="Movie Already liked/disliked")
+    return HTTPException(status_code=201, detail="Movie liked/disliked")
 
 @router.delete("/{user_id}", status_code = 204)
 def remove_user(user_id : int):
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text("DELETE FROM users WHERE users.id = :user_id"), {"user_id":user_id})
-    return
+    return HTTPException(status_code=200, detail="User removed")
+
+def validate_user_movie_ids(user_id : int, movie_id : int, connection) -> None:
+    try:
+        connection.execute(sqlalchemy.text("SELECT 1 FROM users WHERE users.id = :user_id"), {"user_id":user_id}).scalar_one()
+    except sqlalchemy.exc.NoResultFound:
+        raise HTTPException(status_code=404, detail="No user found")
+    try:
+        connection.execute(sqlalchemy.text("SELECT 1 FROM movies WHERE movies.id = :movie_id"), {"movie_id":movie_id}).scalar_one()
+    except sqlalchemy.exc.NoResultFound:
+        raise HTTPException(status_code=404, detail="No movie found")
