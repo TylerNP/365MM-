@@ -246,11 +246,12 @@ class SearchOptions(str, Enum):
     liked = "liked"
 
 
-@router.get("/movies/popular")
+@router.get("/popular")
 def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
     """
     Get the top 5 movies by ratings, views, or likes
     """
+    # movies that have been viewed
     movie_views = (
         sqlalchemy.select(
             db.movies.c.id.label("movie_id"),
@@ -262,6 +263,7 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
         .group_by(db.movies.c.id)
     ).cte("movie_views")
 
+    # movies that have been rated
     movie_ratings = (
         sqlalchemy.select(
             db.movies.c.id.label("movie_id"),
@@ -273,6 +275,7 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
         .group_by(db.movies.c.id)
     ).cte("movie_ratings")
 
+    # movies that have been liked
     movie_likes = (
         sqlalchemy.select(
             db.movies.c.id.label("movie_id"),
