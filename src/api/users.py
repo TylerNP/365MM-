@@ -20,6 +20,9 @@ def user_signup(new_user : user):
     Rejects duplicate usernames
     """
     # USE UNIQUENESS CONSTRAINT With Try Block TO Detect Bad Inputs
+    new_user.username = new_user.username.replace(" ", "")
+    if not new_user.username or new_user.username == "":
+        raise HTTPException(status_code=400, detail="Invalid Username") 
     sql_to_execute = """
                         INSERT INTO users (username)
                         VALUES (:username)
