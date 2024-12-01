@@ -58,7 +58,7 @@ We have now implemented something similar to your second suggestion. We are usin
 
 ## Alan Castillo
 ### Product ideas (Alan Castillo) https://github.com/TylerNP/365MM-/issues/35
-We currently have something similar to your first suggestion. We are using collaborative filtering when recommending movies. I like your second idea. A trending page would make our application more unique and sensitive to time rather than something that's based on a single, growing snowball of data. Thank you.
+We currently have something similar to your first suggestion. We are using collaborative filtering when recommending movies. I like your second idea. A trending page would make our application more unique and sensitive to time rather than something that's based on a single, growing snowball of data. However, this adds extra complexity to our application. 
 
 
 ## Edson Munoz's Suggestions 
@@ -76,6 +76,16 @@ Example Flow 2:
 Example Flow 3:
 - We have pivoted to showing what movies we know are available on a said streaming service. So a user would now enter "Netflix" and our endpoint would return the movies that we know are on Netflix. The list might not be 100% complete, but, nevertheless, our endpoint returns movies on that platform. 
 
-Thank you.
 
+## David Weaver's Suggestions 
+
+### Test Results (David Weaver) https://github.com/TylerNP/365MM-/issues/42
+1. Movie ID 2: Similar to how login work (where a user inputs their username and then receive an id) we intended for movies to work the same way. So a user would either search for a movie and get an ID or our system would give them an ID to look up. The main idea being that they are given an ID rather than expected to come up with one.
+2. I see your point with liking and rating. We thought of liking a movie as something similar to pinning a post on Instagram. So rather than using liked as a metric of calculating other endpoints, we have a separate rating which is more in line with a user giving their honest opinion on a movie. So "liked" is a way to broadcast movies you liked (think all time favorites).
+3. The signup endpoint not being sanitized has now been fixed. So an empty string or a string of just spaces is not valid.
+4. Negative ratings and ratings above 10 are now no longer allowed.
+
+
+### Product ideas (David-Weaver) https://github.com/TylerNP/365MM-/issues/40
+We did not implement auth because Professor Pierce advised us not to. I think a "pick up where you left off" feature is cool, but that would be very cumbersome for the user to interact with every time they leave a movie. As well, I think most streaming services automatically keep track of where a user last left a movie. Thank you.
 
