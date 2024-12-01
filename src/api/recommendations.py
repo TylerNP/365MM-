@@ -91,57 +91,72 @@ def get_recommended(user_id: int):
         recommended_movies = []
         # Make a with table for not watched movies, and then filter off of that in later version
         sql_to_execute = """
-                                SELECT
-                                movies.id,
-                                movies.name,
-                                movies.release_date,
-                                movies.description,
-                                movies.average_rating,
-                                movies.budget,
-                                movies.box_office,
-                                ARRAY_AGG( DISTINCT COALESCE( genres.name, 'N/A')) as genres,
-                                ARRAY_AGG( DISTINCT COALESCE(movie_languages.language, 'N/A')) as languages
-                                FROM
-                                movies
-                                JOIN movie_genres ON movies.id = movie_genres.movie_id 
-                                JOIN genres ON movie_genres.genre_id = genres.id
-                                LEFT JOIN movie_languages on movies.id = movie_languages.movie_id
-                                WHERE
-                                NOT EXISTS (
+                                 WITH rel_ran AS (
                                     SELECT
-                                    1
+                                        movies.id,
+                                        movies.name,
+                                        movies.release_date,
+                                        movies.description,
+                                        movies.average_rating,
+                                        movies.budget,
+                                        movies.box_office,
+                                        genres.id as genre_id,
+                                        ROW_NUMBER() OVER (PARTITION BY genres.id ORDER BY RANDOM()) as ranking,
+                                        ARRAY_AGG( DISTINCT COALESCE( genres.name, 'N/A')) as genres,
+                                        ARRAY_AGG( DISTINCT COALESCE(movie_languages.language, 'N/A')) as languages
                                     FROM
-                                    watched_movies
+                                        movies
+                                    JOIN 
+                                        movie_genres ON movies.id = movie_genres.movie_id 
+                                    JOIN 
+                                        genres ON movie_genres.genre_id = genres.id
+                                    LEFT JOIN
+                                        movie_languages on movies.id = movie_languages.movie_id
                                     WHERE
-                                    user_id = :user_id
-                                    AND movie_id = movies.id
-                                ) AND movie_genres.genre_id = :genre_id
-                                GROUP BY movies.id,
-                                movies.name,
-                                movies.release_date,
-                                movies.description,
-                                movies.average_rating,
-                                movies.budget,
-                                movies.box_office
-                                ORDER BY
-                                RANDOM()
-                                LIMIT :limit
+                                        NOT EXISTS (
+                                            SELECT
+                                            1
+                                            FROM
+                                            watched_movies
+                                            WHERE
+                                            user_id = :user_id
+                                            AND movie_id = movies.id
+                                        ) AND movie_genres.genre_id in (:genre_id_1, :genre_id_2, :genre_id_3)
+                                    GROUP BY movies.id,
+                                        movies.name,
+                                        movies.release_date,
+                                        movies.description,
+                                        movies.average_rating,
+                                        movies.budget,
+                                        movies.box_office,
+                                        genres.id
+                                    )
+                                    SELECT DISTINCT
+                                    id,
+                                    name,
+                                    release_date,
+                                    description,
+                                    average_rating,
+                                    budget,
+                                    box_office,
+                                    genres,
+                                    languages
+                                    FROM 
+                                    rel_ran
+                                    WHERE
+                                    (genre_id = :genre_id_1 AND  ranking <= :genre_ranking_1)
+                                    OR (genre_id = :genre_id_2 AND  ranking <= :genre_ranking_2)
+                                    OR (genre_id = :genre_id_3 AND  ranking <= :genre_ranking_3)
                             """
         # based on how many genres a user has indirectly positivly rated, we will return a different proportion of movies related to genres
         if number_of_genres == 3:
-            values = {'user_id': user_id, "genre_id": users_top_genres[0][0], "limit": 3}
-            recommended_movies += list(connection.execute(sqlalchemy.text(sql_to_execute), values))
-            values = {'user_id': user_id, "genre_id": users_top_genres[1][0], "limit": 2}
-            recommended_movies += list(connection.execute(sqlalchemy.text(sql_to_execute), values))
-            values = {'user_id': user_id, "genre_id": users_top_genres[2][0], "limit": 1}
-            recommended_movies += list(connection.execute(sqlalchemy.text(sql_to_execute), values))
+            values = {'user_id': user_id, 'genre_id_1': users_top_genres[0][0], 'genre_id_2': users_top_genres[1][0], 'genre_id_3':  users_top_genres[2][0], 'genre_ranking_1': 3, 'genre_ranking_2': 2, 'genre_ranking_3': 1}
+            recommended_movies = list(connection.execute(sqlalchemy.text(sql_to_execute), values))
         elif number_of_genres == 2:
-            values = {'user_id': user_id, "genre_id": users_top_genres[0][0], "limit": 3}
-            recommended_movies += list(connection.execute(sqlalchemy.text(sql_to_execute), values))
-            values = {'user_id': user_id, "genre_id": users_top_genres[1][0], "limit": 3}
-            recommended_movies += list(connection.execute(sqlalchemy.text(sql_to_execute), values))
+            values = {'user_id': user_id, 'genre_id_1': users_top_genres[0][0], 'genre_id_2': users_top_genres[1][0], 'genre_id_3':  users_top_genres[1][0], 'genre_ranking_1': 3, 'genre_ranking_2': 3, 'genre_ranking_3': 0}
+            recommended_movies = list(connection.execute(sqlalchemy.text(sql_to_execute), values))
         elif number_of_genres == 1:
-            values = {'user_id': user_id, "genre_id": users_top_genres[0][0], "limit": 6}
+            values = {'user_id': user_id, 'genre_id_1': users_top_genres[0][0], 'genre_id_2': users_top_genres[0][0], 'genre_id_3':  users_top_genres[0][0], 'genre_ranking_1': 6, 'genre_ranking_2': 0, 'genre_ranking_3': 0}
             recommended_movies += list(connection.execute(sqlalchemy.text(sql_to_execute), values))
         else: 
             # default to random genre movie
