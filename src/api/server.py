@@ -4,7 +4,7 @@ from pydantic import ValidationError
 from src.api import users, groups, catalog, analytics, admin, movies, predictions, recommendations
 import json
 import logging
-import sys
+#import sys
 from starlette.middleware.cors import CORSMiddleware
 
 description = """

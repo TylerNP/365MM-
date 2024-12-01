@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
-from pydantic import BaseModel
-from src.api import auth
+from fastapi import APIRouter, HTTPException
+#from pydantic import BaseModel
+#from src.api import auth
 import sqlalchemy
 from src import database as db
 from enum import Enum

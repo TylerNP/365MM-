@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel
-from src.api import auth
+from fastapi import APIRouter
+#from pydantic import BaseModel
+#from src.api import auth
 import sqlalchemy
 from src import database as db
-import random
+#import random
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 from src.api.utils import format_movie_with_agg
