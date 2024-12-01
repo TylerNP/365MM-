@@ -101,17 +101,18 @@ def user_list(user_id : int):
         except sqlalchemy.exc.NoResultFound:
             raise HTTPException(status_code=404, detail="No User Found")
         results = connection.execute(sqlalchemy.text(sql_to_execute), {"user_id":user_id})
-        list_movies = []
-        for info in results:
-            movie = {}
-            movie["movie_id"] = info.id
-            movie["name"] = info.name
-            movie["release_date"] = info.release_date
-            movie["description"] = info.description
-            movie["average_rating"] = info.average_rating
-            movie["budget"] = info.budget
-            movie["box_office"] = info.box_office
-            list_movies.append(movie)
+        
+    list_movies = []
+    for info in results:
+        movie = {}
+        movie["movie_id"] = info.id
+        movie["name"] = info.name
+        movie["release_date"] = info.release_date
+        movie["description"] = info.description
+        movie["average_rating"] = info.average_rating
+        movie["budget"] = info.budget
+        movie["box_office"] = info.box_office
+        list_movies.append(movie)
         
     return list_movies
 

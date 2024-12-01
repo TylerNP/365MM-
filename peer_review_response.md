@@ -103,3 +103,15 @@ Example Flow 3:
 ### Product ideas (David-Weaver) https://github.com/TylerNP/365MM-/issues/40
 We did not implement auth because Professor Pierce advised us not to. I think a "pick up where you left off" feature is cool, but that would be very cumbersome for the user to interact with every time they leave a movie. As well, I think most streaming services automatically keep track of where a user last left a movie. Thank you.
 
+### ### Code Review Comments (David-Weaver) https://github.com/TylerNP/365MM-/issues/39
+1. We implemented an exception when a user tries to use a duplicate username. Thank you for your input
+2. Although we agree, we will stick with the existing variable conventions for consistency
+3. Good point. For loop is moved out of the connection
+4. --
+5. Recommended only does the for loop for 6 movies so that it wont reach runtime errors
+
+6. We have changed the issue with format_movie()
+7. Not sure what you are suggesting because we are using WITH statements instead of one big query
+8. --
+9. See 2
+10. For loop moved out of the connection.

@@ -336,19 +336,20 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
     movies = []
     with db.engine.connect() as connection:
         result = connection.execute(stmt)
-        for row in result:
-            if all(value == None for value in row): # no data to analyze
-                return movies
-            movies.append(
-                {
-                    "movie_id": row.movie_id,
-                    "movie_name": row.name,
-                    "rank": row.rank,
-                    "viewed": row.views,
-                    "rated": row.movie_avg,
-                    "liked": row.likes,
-                }
-            )
+        
+    for row in result:
+        if all(value == None for value in row): # no data to analyze
+            return movies
+        movies.append(
+            {
+                "movie_id": row.movie_id,
+                "movie_name": row.name,
+                "rank": row.rank,
+                "viewed": row.views,
+                "rated": row.movie_avg,
+                "liked": row.likes,
+            }
+        )
     return movies
 
 
