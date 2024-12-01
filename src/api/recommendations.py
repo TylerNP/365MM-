@@ -176,24 +176,6 @@ def get_recommended(user_id: int):
         # map the recommended movies into proper format
         return (list(map(format_movie_with_agg, recommended_movies)) + to_append)
 
-            
-
-# @router.post("/{user_id}/reset/")
-# def reset_recommended():
-#     return NotImplemented
-
-# @router.post("/{user_id}/delete/{movie_id}")
-# def delete_recommendation():
-#     return NotImplemented
-
-# @router.post("/{user_id}/generate/")
-# def generate_recommendation():
-#     return NotImplemented
-
-# @router.post("/{user_id}/collab/")
-# def generate_recommendation_collab():
-#     return NotImplemented
-
 """
     https://pyimagesearch.com/2023/06/19/fundamentals-of-recommendation-systems/
     Try To Create Simple Recommendation Engine 
