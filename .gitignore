@@ -5,3 +5,6 @@ __pycache__/
 archive/
 other/
 populate_data/parameter.py
+supabase/
+.vscode/
+.ds_store
