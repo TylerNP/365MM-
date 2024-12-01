@@ -154,7 +154,7 @@ def list_groups():
     """
     List all groups
     """
-    result = None
+    #result = None
     with db.engine.begin() as connection:
         sql_to_execute = """
             WITH members AS (
