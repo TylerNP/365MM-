@@ -458,16 +458,9 @@ Create a new group with the user as the owner of this group <br />
 }
 ```
 
-### 7.3 Join group - `/groups/{group_id}/join/` (POST)
+### 7.3 Join group - `/groups/{group_id}/join/{user_id}` (POST)
 Add an user to a specific group. <br />
 
-**Request**:
-
-```json
-{
-  "user_id": "integer"
-}
-```
 
 **Response**:
 

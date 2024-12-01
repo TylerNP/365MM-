@@ -101,15 +101,20 @@ def create_group(group : new_group, user_id : int):
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
     return {"group_id":group_id}
 
-@router.post("/{group_id}/join/")
+@router.post("/{group_id}/join/{user_id}")
 def join_group(group_id : int, user_id : int):
     """
     Add a user to a group
     """
     with db.engine.begin() as connection:
-        sql_to_execute = "INSERT INTO groups_joined (user_id, group_id, role) VALUES (:user_id, :group_id, 'Member')"
+        sql_to_execute = "SELECT 1 FROM groups_joined WHERE group_id = :group_id"
         try:
+            # test if group exists
+            if not len(list(connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id}))):
+                raise HTTPException(status_code=409, detail="group does not exist")
+            sql_to_execute = "INSERT INTO groups_joined (user_id, group_id, role) VALUES (:user_id, :group_id, 'Member')"
             connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
+            return HTTPException(status_code=200, detail="Added to group")
         except sqlalchemy.exc.IntegrityError:
             raise HTTPException(status_code=409, detail="user already a member of this group")
 
