@@ -37,3 +37,4 @@ typing_extensions==4.12.2
 tzdata==2024.2
 uvicorn==0.20.0
 virtualenv==20.27.0
+Faker
