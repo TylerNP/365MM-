@@ -157,14 +157,14 @@ def get_recommended(user_id: int):
             recommended_movies = list(connection.execute(sqlalchemy.text(sql_to_execute), values))
         elif number_of_genres == 1:
             values = {'user_id': user_id, 'genre_id_1': users_top_genres[0][0], 'genre_id_2': users_top_genres[0][0], 'genre_id_3':  users_top_genres[0][0], 'genre_ranking_1': 6, 'genre_ranking_2': 0, 'genre_ranking_3': 0}
-            recommended_movies += list(connection.execute(sqlalchemy.text(sql_to_execute), values))
+            recommended_movies = list(connection.execute(sqlalchemy.text(sql_to_execute), values))
         else: 
             # default to random genre movie
             min_max = connection.execute(sqlalchemy.text("SELECT MIN(id), MAX(id) FROM genres")).one()
             for _ in range(6):
                 r = random.randrange(min_max[0], min_max[1])
                 values = {'user_id': user_id, "genre_id": r, "limit": 1}
-                recommended_movies += list(connection.execute(sqlalchemy.text(sql_to_execute), values))
+                recommended_movies = list(connection.execute(sqlalchemy.text(sql_to_execute), values))
 
         # map the recommended movies into proper format
         return (list(map(format_movie_with_agg, recommended_movies)) + to_append)
