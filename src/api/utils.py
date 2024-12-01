@@ -1,5 +1,18 @@
+from typing import TypedDict, Tuple, Union, Protocol
 
-def format_movie_with_agg(movie_result) -> dict[str, any]:
+class MovieDict(TypedDict):  
+    movie_id: Union[int, str]
+    name: str
+    release_date: str 
+    description: str
+    average_rating: float
+    budget: float
+    box_office: float
+    genre: str
+    language: str
+
+MovieResultType = Tuple[Union[int, str], str, str, str, float, float, float, str, str]
+def format_movie_with_agg(movie_result : MovieResultType) -> MovieDict:
     movie = {}
     movie["movie_id"] = movie_result[0]
     movie["name"] = movie_result[1]
@@ -12,19 +25,39 @@ def format_movie_with_agg(movie_result) -> dict[str, any]:
     movie["language"] = movie_result[8]
     return movie
 
+class MovieDictNoAgg(TypedDict):  
+    movie_id: Union[int, str]
+    name: str
+    release_date: str 
+    description: str
+    average_rating: float
+    budget: float
+    box_office: float
+
+class MovieProtocol(Protocol):
+    id: int
+    name: str
+    release_date: str
+    description: str
+    average_rating: float
+    budget: float
+    box_office: float
+    
 # Takes CursorResult Object And Converts into a list of Movie Dictionary For Json
-def format_movies(movie_result : object) -> list[dict[str, any]]:
-    movies = []
-    for info in movie_result:
-        movie = {}
-        movie["movie_id"] = info.id
-        movie["name"] = info.name
-        movie["release_date"] = info.release_date
-        movie["description"] = info.description
-        movie["average_rating"] = info.average_rating
-        movie["budget"] = info.budget
-        movie["box_office"] = info.box_office
-        movies.append(movie)
-        # movie["demographic"] = info.demographic
-    return movies
+def format_movies(movie_result : list[MovieProtocol]) -> list[MovieDictNoAgg]:
+    return (
+        [
+            {
+                "movie_id": info.id,
+                "name": info.name,
+                "release_date": info.release_date,
+                "description": info.description,
+                "average_rating": info.average_rating,
+                "budget": info.budget,
+                "box_office": info.box_office
+                # movie["demographic"] = info.demographic
+            } for info in movie_result
+        ]
+    )
+
 

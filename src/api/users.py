@@ -3,6 +3,7 @@ from pydantic import BaseModel
 #from src.api import auth
 import sqlalchemy
 from src import database as db
+from typing import Literal
 
 router = APIRouter(
     prefix = "/users",
@@ -35,7 +36,7 @@ def user_signup(new_user : user):
             raise HTTPException(status_code=409, detail="Username already in use")
     return HTTPException(status_code=201, detail="New user added")
 
-@router.get("/login")
+@router.post("/login")
 def user_login(username : str):
     user_id = 0
     with db.engine.begin() as connection:
@@ -115,7 +116,7 @@ def user_list(user_id : int):
     return list_movies
 
 @router.post("/{user_id}/rate/{movie_id}")
-def user_rate_movie(user_id : int, movie_id : int, rating : int):
+def user_rate_movie(user_id : int, movie_id : int, rating : Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]):
     """
     Rate a movie for a specific user
     """

@@ -287,7 +287,6 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
         .group_by(db.movies.c.id)
     ).cte("movie_likes")
 
-    m = None
     if sort_option == SearchOptions.views:
         m = (
             sqlalchemy.select(
@@ -306,7 +305,7 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
             )
             .select_from(movie_ratings)
         ).cte("m")
-    elif sort_option == SearchOptions.liked:
+    else: # case when sort_option == SearchOptions.liked
         m = (
             sqlalchemy.select(
                 movie_likes.c.movie_id.label("movie_id"),
@@ -315,8 +314,8 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
             )
             .select_from(movie_likes)
         ).cte("m")
-    else:
-        assert False
+    # else:
+    #     assert False
     stmt = (
         sqlalchemy.select(
             m.c.movie_id.label("movie_id"),

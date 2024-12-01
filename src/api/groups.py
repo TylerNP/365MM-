@@ -192,15 +192,14 @@ def list_groups():
         """
         result = connection.execute(sqlalchemy.text(sql_to_execute))
 
-    groups = []
-    for value in result:
-        groups.append(
+    groups = [
             {
                 "group_id":value.id,
                 "group_name":value.name,
                 "group_description":value.description,
                 "members":value.member,
                 "group_interests":value.interests
-            }
-        )
+            } for value in result 
+        ]
+    
     return groups

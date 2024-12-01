@@ -16,6 +16,8 @@ router = APIRouter(
 @router.get("/{user_id}")
 def get_recommended(user_id: int):
     with db.engine.begin() as connection:
+        connection.execute(sqlalchemy.text("LOCK TABLE ratings IN SHARE ROW EXCLUSIVE MODE;"))
+       
         # get 3-0 collabrative filtered items --> if they are good ones, then add them and get less genre recommended, else stick with genre
         sql_to_execute = '''
                                 SELECT user_id, movie_id, rating FROM ratings
