@@ -1,6 +1,10 @@
 ## Code Review Edits
 
 
+## Professor Pierce Suggestions
+1. For all the suggestions made on this document we have made relevant changes and made comments on what those changes are. 
+https://docs.google.com/document/d/1zAzFkZiAhqgZkoECmcJhOuZl_aJ51HqK7PJPykqXV50/edit?tab=t.0 
+
 
 ## Adam Ta's Suggestions 
 
