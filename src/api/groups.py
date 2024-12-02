@@ -183,11 +183,16 @@ def delete_group(group_id : int, user_id : int):
     return HTTPException(status_code=200, detail="Removed group")
 
 @router.get("/list/")
-def list_groups():
+def list_groups(search_page: int = 1, limit: int = 10):
     """
     List all groups
     """
     start_time = time.time()
+    if limit < 1:
+        raise HTTPException(status_code=422, detail="limit must be a positive number greater than zero")
+    elif search_page < 1:
+        raise HTTPException(status_code=422, detail="search_page must be a positive number greater than zero")
+    offset = (search_page - 1) * limit
     #result = None
     with db.engine.begin() as connection:
         sql_to_execute = """
@@ -223,8 +228,12 @@ def list_groups():
                 groups.id
             ORDER BY 
                 groups.name
+            OFFSET 
+                :offset
+            LIMIT 
+                :limit
         """
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
+        result = connection.execute(sqlalchemy.text(sql_to_execute), {"offset":offset, "limit":limit})
 
     groups = [
             {
