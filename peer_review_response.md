@@ -93,6 +93,23 @@ Example Flow 3:
 
 ## David Weaver's Suggestions 
 
+## Schema/API Design comments (David-Weaver) https://github.com/TylerNP/365MM-/issues/41
+Schema 
+1. Setting the name to "null" explicitly allows us to identify rows where no name has been entered.
+2. No, this is not possible
+3. Foreign key names like movie_genres_movie_id_fkey1 are automatically generated and are standard.
+4. It’s better to leave it NULL to signify “unspecified” and require users to explicitly set the language.
+5. Joined or combined tables are typically created dynamically in queries and are not stored in the schema. Including them would be redundant.
+API spec
+1. The {movie_id} in the path already identifies it. Asking again in the request payload is unnecessary.
+2. We prefer our method of returning the ID back as confirmation.
+3. User verification /authentication is too complicated for the scope of this course
+4. The {movie_id} in the path already identifies it. Asking again in the request payload is unnecessary.
+5. The {genre} in the URL already specifies the genre.
+6. The {movie_id} in the path already identifies it. Asking again is unnecessary.
+7. The group is already identified in the URL. Requesting it again in the body or query parameters duplicates information and goes against RESTful design.
+
+
 ### Test Results (David Weaver) https://github.com/TylerNP/365MM-/issues/42
 1. Movie ID 2: Similar to how login work (where a user inputs their username and then receive an id) we intended for movies to work the same way. So a user would either search for a movie and get an ID or our system would give them an ID to look up. The main idea being that they are given an ID rather than expected to come up with one.
 2. I see your point with liking and rating. We thought of liking a movie as something similar to pinning a post on Instagram. So rather than using liked as a metric of calculating other endpoints, we have a separate rating which is more in line with a user giving their honest opinion on a movie. So "liked" is a way to broadcast movies you liked (think all time favorites).
