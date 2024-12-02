@@ -79,8 +79,8 @@ def new_movie(new_movie : Movie):
         except KeyError:
             print("No Such Genre Exists")
             raise HTTPException(status_code=400, detail="Genre does not exist")
-        except sqlalchemy.exc.IntegrityError:
-            print("Movie Already Exists")
+        except sqlalchemy.exc.IntegrityError as e:
+            print(e)
             raise HTTPException(status_code=409, detail="Movie already exists")
     return {
         "movie_id":movie_id
