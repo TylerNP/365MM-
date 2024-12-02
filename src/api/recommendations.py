@@ -3,6 +3,7 @@ from fastapi import APIRouter
 #from src.api import auth
 import sqlalchemy
 from src import database as db
+import time
 #import random
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
@@ -15,6 +16,7 @@ router = APIRouter(
 
 @router.get("/{user_id}")
 def get_recommended(user_id: int):
+    start_time = time.time()
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text("LOCK TABLE ratings IN SHARE ROW EXCLUSIVE MODE;"))
        
@@ -174,6 +176,8 @@ def get_recommended(user_id: int):
             recommended_movies = list(connection.execute(sqlalchemy.text(sql_to_execute), values))
 
         # map the recommended movies into proper format
+        end_time = time.time()
+        print(f"Took {round(end_time-start_time,4)} ms")
         return (list(map(format_movie_with_agg, recommended_movies)) + to_append)
 
 """

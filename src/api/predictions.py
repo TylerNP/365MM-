@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 #from src.api import auth
 #from enum import Enum
 import math
+import time
 import sqlalchemy
 from src import database as db
 
@@ -13,17 +14,19 @@ router = APIRouter(
 
 @router.get("/{movie_id}")
 def get_prediction(movie_id : int):
+    start_time = time.time()
     prediction = {}
     with db.engine.begin() as connection:
         sql_to_execute = "SELECT predicted_ratings, predicted_views, box_office FROM predictions WHERE movie_id = :movie_id"
-        try:
-            results = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id}).scalar_one()
-        except sqlalchemy.exc.NoResultFound:
-            raise HTTPException(status_code=404, detail="No prediction found, prediction must first be generated")
+        results = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
         for result in results:
             prediction["predicted_ratings"] = result.predicted_ratings
             prediction["predicted_views"] = result.predicted_views
             prediction["box_office"] = result.box_office
+        if not prediction:
+            raise HTTPException(status_code=404, detail="No prediction found, prediction must first be generated")
+    end_time = time.time()
+    print(f"Took {round(end_time-start_time,4)} ms")
     return prediction
 
 @router.post("/generate/{movie_id}")
@@ -31,6 +34,7 @@ def create_prediction(movie_id : int):
     """
     Attempt to predict the performance of a movie (with respect to 365MM)
     """
+    start_time = time.time()
 
     sql_to_execute = """
         WITH search_genres AS (
@@ -102,14 +106,15 @@ def create_prediction(movie_id : int):
             WHERE movies.id = :movie_id
             LIMIT 1
         """), {"movie_id":movie_id})
-        if not result:
-            raise HTTPException(status_code=404, detail="Not enough movie info")
 
         for value in result:
             genres = value.genres
             year = value.year
             month = value.month
             duration = value.duration
+        
+        if not genres: # Could be year, month, or duration also
+            raise HTTPException(status_code=404, detail="Not enough movie info")
         
         result = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
         movie_vector = [3*len(genres), float(duration/15), float(year/1000), float(year%100/10), float(month/3)]
@@ -160,6 +165,8 @@ def create_prediction(movie_id : int):
                     """
         connection.execute(sqlalchemy.text(sql_insert), prediction)
 
+    end_time = time.time()
+    print(f"Took {round(end_time-start_time,4)} ms")
     return HTTPException(status_code=201, detail="Prediction Created")
 
 def normalize_vector(vector : list[int]) -> list[int]:
