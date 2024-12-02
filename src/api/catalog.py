@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 #from pydantic import BaseModel
 #from src.api import auth
+import time
 import sqlalchemy
 from src import database as db
 from enum import Enum
@@ -35,6 +36,7 @@ async def search_movies(
     sort_col: SearchSortOptions = SearchSortOptions.movie_name,
     sort_order: SearchSortOrder = SearchSortOrder.asc,
 ):
+    start_time = time.time()
     if limit < 1:
         raise HTTPException(status_code=422, detail="limit must be a positive number greater than zero")
     elif search_page < 1:
@@ -118,6 +120,8 @@ async def search_movies(
     previous = f"/catalog/search?search_page={search_page - 1}" if search_page > 1 else ""
     next = f"/catalog/search?search_page={search_page + 1}" if len(movies) == limit else ""
 
+    end_time = time.time()
+    print(f"Took {round(end_time-start_time,4)} ms")
     return {
         "previous": previous,
         "next": next,

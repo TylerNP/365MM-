@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
 from src import database as db
+import time
 import sqlalchemy
 from src.api.utils import format_movies
 
@@ -29,6 +30,7 @@ def get_movie(movie_id : int):
     """
     Return movie information for a given movie_id
     """
+    start_time = time.time()
     movie = {}
     result = None
     with db.engine.begin() as connection:
@@ -38,6 +40,8 @@ def get_movie(movie_id : int):
         if not movie:
             raise HTTPException(status_code=404, detail="No movie found")
     print(movie)
+    end_time = time.time()
+    print(f"Took {round(end_time-start_time,4)} ms")
     return movie[-1]
 
 @router.post("/new/")
@@ -45,6 +49,7 @@ def new_movie(new_movie : Movie):
     """
     Create a new entry for a movie
     """
+    start_time = time.time()
     print(new_movie)
     movie_id = 0
     with db.engine.begin() as connection:
@@ -82,6 +87,9 @@ def new_movie(new_movie : Movie):
         except sqlalchemy.exc.IntegrityError as e:
             print(e)
             raise HTTPException(status_code=409, detail="Movie already exists")
+    
+    end_time = time.time()
+    print(f"Took {round(end_time-start_time,4)} ms")
     return {
         "movie_id":movie_id
     }
@@ -92,6 +100,7 @@ def get_movie_available(name : str):
     """
     Returns a list of available movies available in streaming service
     """
+    start_time = time.time()
     print(f"Service {name}")
     sql_to_execute = """SELECT 
                             movies.id, 
@@ -112,6 +121,9 @@ def get_movie_available(name : str):
     with db.engine.begin() as connection:
         movies_available = connection.execute(sqlalchemy.text(sql_to_execute), service)
         movies = format_movies(movies_available)
+
+    end_time = time.time()
+    print(f"Took {round(end_time-start_time,4)} ms")
     return movies
 
 @router.get("/random/user/{user_id}")
@@ -119,6 +131,7 @@ def get_movie_interested(user_id : int):
     """
     Gets a random movie that a user has not watched, empty if no movies available
     """
+    start_time = time.time()
     print(f"User: {user_id}")
     movie = {}
     with db.engine.begin() as connection:
@@ -153,5 +166,8 @@ def get_movie_interested(user_id : int):
         #movie_id = 0
         movie = format_movies(results)[-1]
         print(movie)
+
+    end_time = time.time()
+    print(f"Took {round(end_time-start_time,4)} ms")
     return movie
 
