@@ -46,9 +46,9 @@ def get_group_info(group_id : int):
                 ARRAY_AGG(genres.name) AS interests
             FROM 
                 groups 
-            JOIN
+            LEFT JOIN
                 liked_genres_groups ON groups.id = liked_genres_groups.group_id
-            JOIN
+            LEFT JOIN
                 genres ON liked_genres_groups.genre_id = genres.id
             WHERE 
                 groups.id = :group_id
@@ -62,7 +62,7 @@ def get_group_info(group_id : int):
     for row in result:
         group["name"] = row.name
         group["description"] = row.description
-        group["interests"] = row.interests
+        group["interests"] = row.interests if row.interests[0] != None else ["N/A"]
     end_time = time.time()
     print(f"Took {round(end_time-start_time,4)} ms")
     return group
@@ -118,8 +118,8 @@ def join_group(group_id : int, user_id : int):
             # test if group exists
             if not len(list(connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id}))):
                 raise HTTPException(status_code=409, detail="group does not exist")
-            sql_to_execute = "SELECT * FROM groups_joined WHERE group_id = :group_id"
-            users = list(connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id}))
+            sql_to_execute = "SELECT user_id FROM groups_joined WHERE group_id = :group_id"
+            users = list(connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id}))
             # check if there is another user and make that person the new owner 
             if len(users):
                 role = "Member"
@@ -127,7 +127,6 @@ def join_group(group_id : int, user_id : int):
                 role = "Owner"
             sql_to_execute = "INSERT INTO groups_joined (user_id, group_id, role) VALUES (:user_id, :group_id, :role)"
             connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id, "role": role})
-            return HTTPException(status_code=200, detail="Added to group")
         except sqlalchemy.exc.IntegrityError:
             raise HTTPException(status_code=409, detail="user already a member of this group")
     end_time = time.time()
@@ -148,13 +147,15 @@ def remove_from_group(group_id : int, user_id : int):
             raise HTTPException(status_code=409, detail="user is not a member of this group")
         sql_to_execute = "DELETE FROM groups_joined WHERE group_id = :group_id AND user_id = :user_id"
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
-        sql_to_execute = "SELECT * FROM groups_joined WHERE group_id = :group_id ORDER BY created_at ASC"
-        users = list(connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id}))
+        sql_to_execute = "SELECT user_id FROM groups_joined WHERE group_id = :group_id ORDER BY created_at DESC LIMIT 1"
+        user_id = list(connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id})).scalar_one()
         # check if there is another user and make that person the new owner 
-        if len(users):
+        if user_id:
             sql_to_execute = "UPDATE groups_joined SET role = 'Owner' WHERE groups_joined.user_id = :user_id"
-            connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":users[0][2]})
+            connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
 
+    end_time = time.time()
+    print(f"Took {round(end_time-start_time,4)} ms")
     return HTTPException(status_code=200, detail="Removed user")
 
 @router.delete("/{group_id}/")
@@ -231,7 +232,7 @@ def list_groups():
                 "group_name":value.name,
                 "group_description":value.description,
                 "members":value.member,
-                "group_interests":value.interests
+                "group_interests":value.interests if value.interests[0] != None else ["N/A"]
             } for value in result 
         ]
     
