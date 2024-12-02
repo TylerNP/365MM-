@@ -16,10 +16,8 @@ def get_prediction(movie_id : int):
     prediction = {}
     with db.engine.begin() as connection:
         sql_to_execute = "SELECT predicted_ratings, predicted_views, box_office FROM predictions WHERE movie_id = :movie_id"
-        try:
-            results = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
-        except sqlalchemy.exc.NoResultFound:
-            print("No prediction yet")
+        results = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
+        if not results:
             raise HTTPException(status_code=404, detail="No prediction found, prediction must first be generated")
         for result in results:
             prediction["predicted_ratings"] = result.predicted_ratings
@@ -93,20 +91,19 @@ def create_prediction(movie_id : int):
         for _ in result:
             print("Movie Prediction Already Generated")
             raise HTTPException(status_code=409, detail="Movie prediction already generated")
-        try:
-            result = connection.execute(sqlalchemy.text("""
-                SELECT movies.duration, EXTRACT(YEAR FROM movies.release_date) "year", 
-                    EXTRACT(MONTH FROM movies.release_date) "month", 
-                    ARRAY_AGG(genres.name) OVER (PARTITION BY movies.id) AS genres 
-                FROM movies
-                JOIN movie_genres ON movies.id = movie_genres.movie_id 
-                JOIN genres ON movie_genres.genre_id = genres.id
-                WHERE movies.id = :movie_id
-                LIMIT 1
-            """), {"movie_id":movie_id})
-        except sqlalchemy.exc.NoResultFound:
-            print("Not Enough Info On Movie TO Predict")
-            return "OK"
+        result = connection.execute(sqlalchemy.text("""
+            SELECT movies.duration, EXTRACT(YEAR FROM movies.release_date) "year", 
+                EXTRACT(MONTH FROM movies.release_date) "month", 
+                ARRAY_AGG(genres.name) OVER (PARTITION BY movies.id) AS genres 
+            FROM movies
+            JOIN movie_genres ON movies.id = movie_genres.movie_id 
+            JOIN genres ON movie_genres.genre_id = genres.id
+            WHERE movies.id = :movie_id
+            LIMIT 1
+        """), {"movie_id":movie_id})
+        if not result:
+            raise HTTPException(status_code=404, detail="Not enough movie info")
+
         for value in result:
             genres = value.genres
             year = value.year
