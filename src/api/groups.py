@@ -140,7 +140,7 @@ def delete_group(group_id : int, user_id : int):
                 FROM users 
                 JOIN groups_joined 
                     ON users.id = groups_joined.user_id AND groups_joined.role = 'Owner'
-                WHERE users.id = :user_id AND groups.id = ":group_id"
+                WHERE users.id = :user_id AND groups_joined.group_id = :group_id
             """
             connection.execute(sqlalchemy.text(sql_to_execute), {"user_id":user_id, "group_id":group_id } ).scalar_one()
         except sqlalchemy.exc.NoResultFound:
