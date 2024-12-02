@@ -17,7 +17,7 @@ def get_prediction(movie_id : int):
     with db.engine.begin() as connection:
         sql_to_execute = "SELECT predicted_ratings, predicted_views, box_office FROM predictions WHERE movie_id = :movie_id"
         results = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
-        if not results:
+        if result is None:
             raise HTTPException(status_code=404, detail="No prediction found, prediction must first be generated")
         for result in results:
             prediction["predicted_ratings"] = result.predicted_ratings
