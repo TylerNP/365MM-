@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 # from pydantic import BaseModel
 # from src.api import auth
 from enum import Enum
+import time
 import sqlalchemy
 from src import database as db
 
@@ -19,7 +20,7 @@ class search_sort_options(str, Enum):
 
 class search_sort_order(str, Enum):
     asc = "asc"
-    desc = "desc"   
+    desc = "desc"           
 
 #@router.get("/movies/search/")
 def search_orders(
@@ -35,6 +36,7 @@ def get_movie_analytics(movie_id : int):
     """
     Obtain information about the number of users that rated, watched, or liked/disliked a movie
     """
+    start_time = time.time()
     views = 0
     rated = 0
     liked = 0
@@ -69,6 +71,8 @@ def get_movie_analytics(movie_id : int):
             rating = result.rating
             liked = result.liked
             disliked = result.disliked
+    end_time = time.time()
+    print(f"Took {round(end_time-start_time,4)} ms")
     return {
         "views": views,
         "rated": rated,
@@ -83,6 +87,7 @@ def get_genre_analytics(genre : str):
     Obtain information about the avg statistics of movies in a specific genre 
     given they have some form of user interaction (rate, watched, liked)
     """
+    start_time = time.time()
     result = None
     with db.engine.begin() as connection:
         sql_to_execute = "SELECT genres.id FROM genres WHERE genres.name = :genre"
@@ -238,6 +243,8 @@ def get_genre_analytics(genre : str):
             "lowest_rating": values.lowest_rating,
             "movie_ids": movie_ids
         }
+    end_time = time.time()
+    print(f"Took {round(end_time-start_time,4)} ms")
     return genre
 
 class SearchOptions(str, Enum):
@@ -252,6 +259,7 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
     Get the top 5 movies by ratings, views, or likes
     """
     # movies that have been viewed
+    start_time = time.time()
     movie_views = (
         sqlalchemy.select(
             db.movies.c.id.label("movie_id"),
@@ -350,8 +358,6 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
                 "liked": row.likes,
             }
         )
+    end_time = time.time()
+    print(f"Took {round(end_time-start_time, 4)} ms")
     return movies
-
-
-
-
