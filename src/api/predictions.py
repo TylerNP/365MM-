@@ -160,16 +160,15 @@ def create_prediction(movie_id : int):
                     """
         connection.execute(sqlalchemy.text(sql_insert), prediction)
 
-    return {
-        "success":True
-    }
+    return HTTPException(status_code=201, detail="Prediction Created")
 
 def normalize_vector(vector : list[int]) -> list[int]:
     length = math.sqrt(sum(value*value for value in vector))
     return [value/length for value in vector]
     
 
-""" FOR LATER INSPECTION
+'''
+FOR LATER INSPECTION
         current_movie_genre = connection.execute(sqlalchemy.text(""
             SELECT movies.name, genres.name
             FROM movies
@@ -226,4 +225,4 @@ def normalize_vector(vector : list[int]) -> list[int]:
             "box_office": 0
         }
 
-    """
+'''
