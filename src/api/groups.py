@@ -107,13 +107,20 @@ def join_group(group_id : int, user_id : int):
     Add a user to a group
     """
     with db.engine.begin() as connection:
-        sql_to_execute = "SELECT 1 FROM groups_joined WHERE group_id = :group_id"
+        sql_to_execute = "SELECT 1 FROM groups WHERE id = :group_id"
         try:
             # test if group exists
             if not len(list(connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id}))):
                 raise HTTPException(status_code=409, detail="group does not exist")
-            sql_to_execute = "INSERT INTO groups_joined (user_id, group_id, role) VALUES (:user_id, :group_id, 'Member')"
-            connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
+            sql_to_execute = "SELECT * FROM groups_joined WHERE group_id = :group_id"
+            users = list(connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id}))
+            # check if there is another user and make that person the new owner 
+            if len(users):
+                role = "Member"
+            else:
+                role = "Owner"
+            sql_to_execute = "INSERT INTO groups_joined (user_id, group_id, role) VALUES (:user_id, :group_id, :role)"
+            connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id, "role": role})
             return HTTPException(status_code=200, detail="Added to group")
         except sqlalchemy.exc.IntegrityError:
             raise HTTPException(status_code=409, detail="user already a member of this group")
@@ -124,8 +131,20 @@ def remove_from_group(group_id : int, user_id : int):
     Remove a user form a group
     """
     with db.engine.begin() as connection:
+        sql_to_execute = "SELECT count(1) FROM groups_joined WHERE group_id = :group_id and user_id = :user_id"
+        exists = connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id}).scalar()
+        print(exists)
+        if not exists:
+            raise HTTPException(status_code=409, detail="user is not a member of this group")
         sql_to_execute = "DELETE FROM groups_joined WHERE group_id = :group_id AND user_id = :user_id"
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
+        sql_to_execute = "SELECT * FROM groups_joined WHERE group_id = :group_id ORDER BY created_at ASC"
+        users = list(connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id}))
+        # check if there is another user and make that person the new owner 
+        if len(users):
+            sql_to_execute = "UPDATE groups_joined SET role = 'Owner' WHERE groups_joined.user_id = :user_id"
+            connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":users[0][2]})
+
     return HTTPException(status_code=200, detail="Removed user")
 
 @router.delete("/{group_id}/")
