@@ -140,9 +140,9 @@ def delete_group(group_id : int, user_id : int):
                 FROM users 
                 JOIN groups_joined 
                     ON users.id = groups_joined.user_id AND groups_joined.role = 'Owner'
-                WHERE users.id = :user_id
+                WHERE users.id = :user_id AND groups.id = ":group_id"
             """
-            connection.execute(sqlalchemy.text(sql_to_execute), {"user_id":user_id}).scalar_one()
+            connection.execute(sqlalchemy.text(sql_to_execute), {"user_id":user_id, "group_id":group_id } ).scalar_one()
         except sqlalchemy.exc.NoResultFound:
             raise HTTPException(status_code=403, detail="Invalid Authorization")
         sql_to_execute = "DELETE FROM groups WHERE groups.id = :group_id"

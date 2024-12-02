@@ -1,6 +1,10 @@
 ## Code Review Edits
 
 
+## Professor Pierce Suggestions
+1. For all the suggestions made on this document we have made relevant changes and made comments on what those changes are. 
+https://docs.google.com/document/d/1zAzFkZiAhqgZkoECmcJhOuZl_aJ51HqK7PJPykqXV50/edit?tab=t.0 
+
 
 ## Adam Ta's Suggestions 
 
@@ -125,11 +129,10 @@ We did not implement auth because Professor Pierce advised us not to. I think a 
 1. We implemented an exception when a user tries to use a duplicate username. Thank you for your input
 2. Although we agree, we will stick with the existing variable conventions for consistency
 3. Good point. For loop is moved out of the connection
-4. --
+4. In this query, we don't see why a a window function is necessary, we are not trying to do calculations per-row. 
 5. Recommended only does the for loop for 6 movies so that it wont reach runtime errors
-
 6. We have changed the issue with format_movie()
 7. Not sure what you are suggesting because we are using WITH statements instead of one big query
-8. --
+8. Thank you for your feedback, in this if/else statement, we are trying to change a variable in a specific case. We don't know how we would be able to do a specific case using a map. 
 9. See 2
 10. For loop moved out of the connection.

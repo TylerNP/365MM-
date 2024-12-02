@@ -117,10 +117,11 @@ def user_list(user_id : int):
     return list_movies
 
 @router.post("/{user_id}/rate/{movie_id}")
-def user_rate_movie(user_id : int, movie_id : int, rating : Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]):
+def user_rate_movie(user_id : int, movie_id : int, rating : Literal["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]):
     """
     Rate a movie for a specific user
     """
+    rating = int(rating)
     # Add Check For Movie and User IDs To Ensure They Exists
     if rating < 1 or rating > 10:
         raise HTTPException(status_code=400, detail="Rating must be between 1 to 10")
