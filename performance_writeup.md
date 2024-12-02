@@ -24,11 +24,14 @@ With this in mind, we get around 50,000 rows from cast, 30,000 from streaming se
 ## Analytics
 
 ### Get_Movie_Analytics
-
+1. 0.0335 ms
+2. 
 ### Get_Genre_Analytics
-
+1. 0.0944 ms 
+2. 
 ### Get_Most_Popular
-
+1. 0.1592 ms 0.1559 ms 0.1497 ms 
+2. 
 ## Admin
 
 ## Catalog
