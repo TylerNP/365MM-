@@ -100,6 +100,7 @@ Schema
 3. Foreign key names like movie_genres_movie_id_fkey1 are automatically generated and are standard.
 4. It’s better to leave it NULL to signify “unspecified” and require users to explicitly set the language.
 5. Joined or combined tables are typically created dynamically in queries and are not stored in the schema. Including them would be redundant.
+
 API spec
 1. The {movie_id} in the path already identifies it. Asking again in the request payload is unnecessary.
 2. We prefer our method of returning the ID back as confirmation.
