@@ -23,7 +23,7 @@ def get_recommended(user_id: int):
         # get 3-0 collabrative filtered items --> if they are good ones, then add them and get less genre recommended, else stick with genre
         sql_to_execute = '''
                                 SELECT user_id, movie_id, rating FROM ratings
-                                ORDER BY user_id, rating    
+                                ORDER BY user_id, rating LIMIT 10000  
                         '''
         users_ratings = list(connection.execute(sqlalchemy.text(sql_to_execute)))
         df = pd.DataFrame(users_ratings, columns=["user_id", "movie_id", "rating"])
@@ -99,7 +99,7 @@ def get_recommended(user_id: int):
                                         movies.name,
                                         movies.release_date,
                                         movies.description,
-                                        movies.average_rating,
+                                        COALESCE(movies.average_rating, 0) AS average_rating,
                                         movies.budget,
                                         movies.box_office,
                                         genres.id as genre_id,
