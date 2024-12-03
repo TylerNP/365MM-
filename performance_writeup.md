@@ -1297,3 +1297,20 @@ Execution Time: 80.799 ms
 
 ### Improvements
 The new index on watched_movies removes the original sequential scan on watched_movies and replaces it with an index scan and improved execution time. No additional indices were creaated for liked_movies, ratings, or movies since they scan the entire table already and would provide no improvements. 
+
+## New Results Improvements
+
+### Get_Recommend
+1. 0.4496 s
+
+Minor improvement, but this is probably because most of the execution time is a result of matrix multiplication rather than the query itself.
+
+### Create_Prediction
+1. 0.2169 s
+
+Small improvement, since similar to Get_Recommended, matrix multiplication occurs, but on a smaller scale.
+
+### Get_Genre_Analytics
+1. 0.0778 s
+
+Sizable improvement, since this endpoint execution time is almost entirely dependent on the query.
