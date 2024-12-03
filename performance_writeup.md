@@ -25,13 +25,14 @@ With this in mind, we get around 50,000 rows from cast, 30,000 from streaming se
 
 ### Get_Movie_Analytics
 1. 0.0335 s
-2. 
+ 
 ### Get_Genre_Analytics
 1. 0.0944 s
-2. 
+
 ### Get_Most_Popular
-1. 0.1592 s 0.1559 s 0.1497 s 
-2. 
+1. 0.1592 s 
+2. 0.1559 s 
+3. 0.1497 s 
 
 ## Users
 
@@ -418,7 +419,7 @@ Execution Time: 61.949 ms
 ### Explanation (Using User_id 130000 genres(21-23) with ranks(1-3) in same order)
 A quick summary of this would be that the planner uses unique to remove duplciate values with multiple sorts to order the data. With the sorts in the CTE, aggregate function are also called to group data and also aggregate data. Also, multiple joins are called to get all the data available for the movies and an anti join is used to remove already seen movies. With this multiple sequential scans on the entire table are done alongside filters to get the necessary movies and their data. In some caes, a hash is used, and others indexes for unique values. Once the CTE is constructed, one last sort is called on it with a filter to only get the top results for the respective genres. 
 
-# Predictions
+# Create_Predictions
 
 ## 1st Query (ONLY 1)
 ```
@@ -547,6 +548,337 @@ Execution Time: 16.393 ms
 ```
 
 ### Explanation
-To sum this up, the query plan relies heavily on hash joins on the tables with CTES to join the data together. This is used in tandem with sorts and sequential scans to grab the data.
+To sum this up, the query plan relies heavily on hash joins on the tables with CTES to join the data together. This is used in tandem with sorts and sequential scans to grab the data. To reduce a composite index on ratings with movie_id and ratings was used to ease the join.
+
 
 ***Results***
+```
+GroupAggregate  (cost=28290.86..50838.28 rows=162918 width=160) (actual time=12.362..12.373 rows=0 loops=1)
+  Group Key: movie_to_check.id, movie_views.view, movie_ratings.avg, movies.box_office, movie_to_check.duration, movie_to_check.year, movie_to_check.month
+  CTE search_genres
+    ->  Index Only Scan using unique_movie_genre on movie_genres movie_genres_1  (cost=0.29..8.33 rows=2 width=8) (actual time=0.035..0.035 rows=0 loops=1)
+          Index Cond: (movie_id = 130000)
+          Heap Fetches: 0
+  CTE movie_to_check   
+      ->  Hash Join  (cost=1687.13..5083.82 rows=9096 width=80) (actual time=0.094..0.096 rows=0 loops=1)
+          Hash Cond: (movies_1.id = movie_genres_2.movie_id)
+          ->  Seq Scan on movies movies_1  (cost=0.00..2976.84 rows=45346 width=24) (actual time=0.022..0.022 rows=1 loops=1)
+                Filter: (id <> 130000)
+          ->  Hash  (cost=1573.43..1573.43 rows=9096 width=8) (actual time=0.036..0.037 rows=0 loops=1)
+                Buckets: 16384  Batches: 1  Memory Usage: 128kB
+                ->  Nested Loop  (cost=55.54..1573.43 rows=9096 width=8) (actual time=0.036..0.036 rows=0 loops=1)
+                      ->  CTE Scan on search_genres search_genres_1  (cost=0.00..0.04 rows=2 width=8) (actual time=0.035..0.035 rows=0 loops=1)
+                      ->  Bitmap Heap Scan on movie_genres movie_genres_2  (cost=55.54..741.22 rows=4548 width=16) (never executed)
+                            Recheck Cond: (genre_id = search_genres_1.genre_id)
+                            ->  Bitmap Index Scan on movie_genre_genre_id  (cost=0.00..54.40 rows=4548 width=0) (never executed)
+                                  Index Cond: (genre_id = search_genres_1.genre_id)
+  ->  Incremental Sort  (cost=23198.71..40451.30 rows=162918 width=160) (actual time=12.361..12.369 rows=0 loops=1)
+        Sort Key: movie_to_check.id, movie_views.view, movie_ratings.avg, movies.box_office, movie_to_check.duration, movie_to_check.year, movie_to_check.month
+        Presorted Key: movie_to_check.id
+        Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 25kB  Peak Memory: 25kB
+        ->  Merge Left Join  (cost=23123.29..25676.87 rows=162918 width=160) (actual time=12.345..12.353 rows=0 loops=1)
+              Merge Cond: (movie_to_check.id = movie_to_check_1.id)
+              Filter: ((movie_views.view IS NOT NULL) OR (movie_ratings.avg IS NOT NULL) OR (movies.box_office IS NOT NULL))
+              ->  Sort  (cost=19770.13..19825.06 rows=21971 width=152) (actual time=12.343..12.351 rows=0 loops=1)
+                    Sort Key: movie_to_check.id
+                    Sort Method: quicksort  Memory: 25kB
+                    ->  Hash Join  (cost=17367.73..18185.66 rows=21971 width=152) (actual time=12.339..12.347 rows=0 loops=1)
+                          Hash Cond: (movie_genres.genre_id = genres.id)
+                          ->  Hash Left Join  (cost=17366.28..18114.31 rows=21971 width=128) (actual time=12.314..12.321 rows=0 loops=1)
+                                Hash Cond: (movie_genres.genre_id = search_genres.genre_id)
+                                ->  Hash Join  (cost=17366.21..18009.89 rows=21971 width=128) (actual time=12.313..12.317 rows=0 loops=1)
+                                      Hash Cond: (movie_to_check.id = movie_genres.movie_id)
+                                      ->  Hash Left Join  (cost=14650.65..14881.33 rows=9096 width=120) (actual time=0.098..0.101 rows=0 loops=1)
+                                            Hash Cond: (movie_to_check.id = movie_ratings.id)
+                                            ->  Hash Left Join  (cost=9957.36..10163.66 rows=9096 width=88) (actual time=0.097..0.099 rows=0 loops=1)
+                                                  Hash Cond: (movie_to_check.id = movie_views.id)
+                                                  ->  CTE Scan on movie_to_check  (cost=0.00..181.92 rows=9096 width=80) (actual time=0.096..0.097 rows=0 loops=1)
+                                                  ->  Hash  (cost=9954.86..9954.86 rows=200 width=16) (never executed)
+                                                        ->  Subquery Scan on movie_views  (cost=9950.86..9954.86 rows=200 width=16) (never executed)
+                                                              ->  HashAggregate  (cost=9950.86..9952.86 rows=200 width=16) (never executed)
+                                                                    Group Key: movie_to_check_2.id
+                                                                    ->  Hash Join  (cost=7524.69..9695.24 rows=51124 width=16) (never executed)
+                                                                          Hash Cond: (movie_to_check_2.id = watched_movies.movie_id)
+                                                                          ->  CTE Scan on movie_to_check movie_to_check_2  (cost=0.00..181.92 rows=9096 width=8) (never executed)
+                                                                          ->  Hash  (cost=3867.75..3867.75 rows=222875 width=8) (never executed)
+                                                                                ->  Seq Scan on watched_movies  (cost=0.00..3867.75 rows=222875 width=8) (never executed)
+                                            ->  Hash  (cost=4690.80..4690.80 rows=200 width=40) (never executed)
+                                                  ->  Subquery Scan on movie_ratings  (cost=4686.30..4690.80 rows=200 width=40) (never executed)
+                                                        ->  HashAggregate  (cost=4686.30..4688.80 rows=200 width=40) (never executed)
+                                                              Group Key: movie_to_check_3.id
+                                                              ->  Hash Join  (cost=3748.03..4532.72 rows=30715 width=16) (never executed)
+                                                                    Hash Cond: (movie_to_check_3.id = ratings.movie_id)
+                                                                    ->  CTE Scan on movie_to_check movie_to_check_3  (cost=0.00..181.92 rows=9096 width=8) (never executed)
+                                                                    ->  Hash  (cost=2228.57..2228.57 rows=121557 width=16) (never executed)
+                                                                          ->  Seq Scan on ratings  (cost=0.00..2228.57 rows=121557 width=16) (never executed)
+                                      ->  Hash  (cost=1578.58..1578.58 rows=90958 width=16) (actual time=12.026..12.027 rows=90958 loops=1)
+                                            Buckets: 131072  Batches: 1  Memory Usage: 5288kB
+                                            ->  Seq Scan on movie_genres  (cost=0.00..1578.58 rows=90958 width=16) (actual time=0.011..5.225 rows=90958 loops=1)
+                                ->  Hash  (cost=0.04..0.04 rows=2 width=8) (never executed)
+                                      ->  CTE Scan on search_genres  (cost=0.00..0.04 rows=2 width=8) (never executed)
+                          ->  Hash  (cost=1.20..1.20 rows=20 width=40) (actual time=0.019..0.019 rows=20 loops=1)
+                                Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                ->  Seq Scan on genres  (cost=0.00..1.20 rows=20 width=40) (actual time=0.013..0.015 rows=20 loops=1)
+              ->  Sort  (cost=3353.16..3356.87 rows=1483 width=16) (never executed)
+                    Sort Key: movie_to_check_1.id
+                    ->  Hash Join  (cost=3069.25..3275.05 rows=1483 width=16) (never executed)
+                          Hash Cond: (movie_to_check_1.id = movies.id)
+                          ->  CTE Scan on movie_to_check movie_to_check_1  (cost=0.00..181.92 rows=9096 width=8) (never executed)
+                          ->  Hash  (cost=2976.84..2976.84 rows=7393 width=16) (never executed)
+                                ->  Seq Scan on movies  (cost=0.00..2976.84 rows=7393 width=16) (never executed)
+                                      Filter: (box_office <> 0)
+Planning Time: 2.127 ms
+Execution Time: 12.697 ms
+```
+
+### Improvements
+Removes the need
+
+# Get_Genre_Analytics
+
+## 1st Query 
+```
+SELECT genres.id FROM genres WHERE genres.name = :genre
+```
+
+***Explain***
+```
+Seq Scan on genres  (cost=0.00..1.25 rows=1 width=8) (actual time=0.007..0.008 rows=1 loops=1)
+  Filter: (name = 'Action'::text)
+  Rows Removed by Filter: 19
+Planning Time: 0.165 ms
+Execution Time: 0.038 ms
+```
+### Explanation
+Sequential scans the table for matching text after removing all other rows that don't meet condition. No index was added as this was sufficiently fast. 
+
+## 2nd Query
+```
+WITH movie_in_genre AS (
+    SELECT
+        movies.id AS movie_id, movies.name
+    FROM
+        movies
+    JOIN 
+        movie_genres ON movie_genres.movie_id = movies.id 
+        AND movie_genres.genre_id = :genre_id
+    GROUP BY
+        movies.id
+),
+movie_views AS (
+    SELECT
+        movie_in_genre.movie_id,
+        COUNT(watched_movies.movie_id) AS views
+    FROM
+        movie_in_genre
+    JOIN
+        watched_movies
+    ON movie_in_genre.movie_id = watched_movies.movie_id
+    GROUP BY
+        movie_in_genre.movie_id
+),
+movie_ratings AS (
+    SELECT
+        movie_in_genre.movie_id,
+        ROUND(AVG(ratings.rating), 1) AS movie_avg 
+    FROM
+        movie_in_genre
+    JOIN
+        ratings
+    ON movie_in_genre.movie_id = ratings.movie_id
+    GROUP BY
+        movie_in_genre.movie_id
+),
+movie_likeness AS (
+    SELECT
+        movie_in_genre.movie_id,
+        SUM(CASE WHEN liked_movies.liked = True THEN 1 ELSE 0 END) AS total_likes,
+        SUM(CASE WHEN liked_movies.liked = False THEN 1 ELSE 0 END) AS total_dislikes
+    FROM
+        movie_in_genre
+    JOIN
+        liked_movies
+    ON movie_in_genre.movie_id = liked_movies.movie_id
+    GROUP BY
+        movie_in_genre.movie_id
+),
+most_viewed_movies AS (
+    SELECT 
+        m.movie_id, 
+        m.rank 
+    FROM (
+        SELECT 
+        movie_views.movie_id, 
+        ROW_NUMBER() OVER (ORDER BY movie_views.views DESC) AS rank 
+        FROM movie_views
+    ) AS m LIMIT 1
+),
+filtered_ratings AS (
+    SELECT 
+        high_ratings, 
+        low_ratings 
+    FROM (
+        (SELECT FIRST_VALUE(movie_id) OVER (ORDER BY rank) AS high_ratings, FIRST_VALUE(movie_id) OVER (ORDER BY rank DESC) AS low_ratings
+        FROM (
+            SELECT 
+            m.movie_id, 
+            m.rank 
+            FROM (
+            SELECT 
+                movie_ratings.movie_id, 
+                ROW_NUMBER() OVER (ORDER BY movie_ratings.movie_avg DESC) AS rank 
+            FROM movie_ratings ) AS m
+            ) AS temp
+        LIMIT 1)
+    ) AS done
+),
+filtered_views AS (
+    SELECT high, low FROM (
+    (SELECT FIRST_VALUE(movie_id) OVER (ORDER BY rank) AS high, FIRST_VALUE(movie_id) OVER (ORDER BY rank DESC) AS low
+    FROM (
+        SELECT 
+        m.movie_id, 
+        m.rank 
+        FROM (
+        SELECT 
+            movie_views.movie_id, 
+            ROW_NUMBER() OVER (ORDER BY movie_views.views DESC) AS rank 
+        FROM movie_views) AS m
+        ) AS temp 
+    LIMIT 1)
+    ) AS done
+)
+
+SELECT
+    COALESCE(ROUND(AVG(movie_views.views), 1)::real,0)  AS avg_views,
+    COALESCE(ROUND(AVG(movie_ratings.movie_avg), 1)::real,0)  AS avg_ratings,
+    COALESCE(ROUND(AVG(movie_likeness.total_likes), 1)::real,0) AS avg_likes,
+    COALESCE(ROUND(AVG(movie_likeness.total_dislikes), 1)::real,0) AS avg_dislikes,
+    COALESCE(MAX(movie_views.views),0) AS most_views,
+    COALESCE(MAX(movie_ratings.movie_avg)::real,0) AS highest_rating,
+    COALESCE(MIN(movie_views.views),0) AS least_views,
+    COALESCE(MIN(movie_ratings.movie_avg)::real,0) AS lowest_rating,
+    (SELECT high_ratings FROM filtered_ratings) AS highest_rated_movie,
+    (SELECT low_ratings FROM filtered_ratings) AS lowest_rated_movie,
+    (SELECT high FROM filtered_views) AS highest_viewed_movie,
+    (SELECT low FROM filtered_views) AS lowest_viewed_movie
+FROM 
+    movie_in_genre
+LEFT JOIN
+    movie_views ON movie_in_genre.movie_id = movie_views.movie_id
+LEFT JOIN
+    movie_ratings ON movie_in_genre.movie_id = movie_ratings.movie_id
+LEFT JOIN
+    movie_likeness ON movie_in_genre.movie_id = movie_likeness.movie_id
+```
+
+***Explain***
+```
+Aggregate  (cost=22491.22..22491.25 rows=1 width=72) (actual time=109.166..109.177 rows=1 loops=1)
+  CTE movie_in_genre
+    ->  HashAggregate  (cost=3907.40..3973.10 rows=6570 width=25) (actual time=17.342..17.859 rows=6589 loops=1)
+          Group Key: movies.id
+          Batches: 1  Memory Usage: 721kB
+          ->  Hash Join  (cost=908.46..3890.98 rows=6570 width=25) (actual time=2.763..16.150 rows=6589 loops=1)
+                Hash Cond: (movies.id = movie_genres.movie_id)
+                ->  Seq Scan on movies  (cost=0.00..2863.47 rows=45347 width=25) (actual time=0.004..3.287 rows=45347 loops=1)
+                ->  Hash  (cost=826.34..826.34 rows=6570 width=8) (actual time=2.725..2.726 rows=6589 loops=1)
+                      Buckets: 8192  Batches: 1  Memory Usage: 322kB
+                      ->  Bitmap Heap Scan on movie_genres  (cost=75.21..826.34 rows=6570 width=8) (actual time=0.474..2.025 rows=6589 loops=1)
+                            Recheck Cond: (genre_id = 21)
+                            Heap Blocks: exact=669
+                            ->  Bitmap Index Scan on movie_genre_genre_id  (cost=0.00..73.57 rows=6570 width=0) (actual time=0.341..0.342 rows=6589 loops=1)
+                                  Index Cond: (genre_id = 21)
+  CTE movie_views
+    ->  HashAggregate  (cost=9518.98..9520.98 rows=200 width=16) (actual time=43.432..43.819 rows=6535 loops=1)
+          Group Key: movie_in_genre_2.movie_id
+          Batches: 1  Memory Usage: 737kB
+          ->  Hash Join  (cost=7524.69..9334.34 rows=36927 width=16) (actual time=31.946..40.437 rows=32208 loops=1)
+                Hash Cond: (movie_in_genre_2.movie_id = watched_movies.movie_id)
+                ->  CTE Scan on movie_in_genre movie_in_genre_2  (cost=0.00..131.40 rows=6570 width=8) (actual time=0.001..1.384 rows=6589 loops=1)
+                ->  Hash  (cost=3867.75..3867.75 rows=222875 width=8) (actual time=31.850..31.850 rows=222875 loops=1)
+                      Buckets: 262144  Batches: 2  Memory Usage: 6396kB
+                      ->  Seq Scan on watched_movies  (cost=0.00..3867.75 rows=222875 width=8) (actual time=0.012..13.376 rows=222875 loops=1)
+  CTE movie_ratings
+    ->  HashAggregate  (cost=4425.73..4428.73 rows=200 width=40) (actual time=17.388..18.277 rows=6154 loops=1)
+          Group Key: movie_in_genre_3.movie_id
+          Batches: 1  Memory Usage: 1249kB
+          ->  Hash Join  (cost=3748.03..4314.81 rows=22185 width=16) (actual time=13.282..15.887 rows=17765 loops=1)
+                Hash Cond: (movie_in_genre_3.movie_id = ratings.movie_id)
+                ->  CTE Scan on movie_in_genre movie_in_genre_3  (cost=0.00..131.40 rows=6570 width=8) (actual time=0.000..0.244 rows=6589 loops=1)
+                ->  Hash  (cost=2228.57..2228.57 rows=121557 width=16) (actual time=13.150..13.150 rows=121557 loops=1)
+                      Buckets: 131072  Batches: 1  Memory Usage: 6722kB
+                      ->  Seq Scan on ratings  (cost=0.00..2228.57 rows=121557 width=16) (actual time=0.014..6.071 rows=121557 loops=1)
+  CTE filtered_ratings
+    ->  Subquery Scan on done  (cost=35.93..35.96 rows=1 width=16) (actual time=4.340..4.341 rows=1 loops=1)
+          ->  Limit  (cost=35.93..35.95 rows=1 width=24) (actual time=4.339..4.340 rows=1 loops=1)
+                ->  WindowAgg  (cost=35.93..39.43 rows=200 width=24) (actual time=4.338..4.339 rows=1 loops=1)
+                      ->  Sort  (cost=35.93..36.43 rows=200 width=24) (actual time=4.335..4.336 rows=2 loops=1)
+                            Sort Key: m.rank
+                            Sort Method: quicksort  Memory: 577kB
+                            ->  WindowAgg  (cost=24.79..28.29 rows=200 width=24) (actual time=2.878..3.863 rows=6154 loops=1)
+                                  ->  Sort  (cost=24.79..25.29 rows=200 width=16) (actual time=2.875..3.008 rows=6154 loops=1)
+                                        Sort Key: m.rank DESC
+                                        Sort Method: quicksort  Memory: 529kB
+                                        ->  Subquery Scan on m  (cost=11.64..17.14 rows=200 width=16) (actual time=1.070..2.413 rows=6154 loops=1)
+                                              ->  WindowAgg  (cost=11.64..15.14 rows=200 width=48) (actual time=1.069..2.178 rows=6154 loops=1)
+                                                    ->  Sort  (cost=11.64..12.14 rows=200 width=40) (actual time=1.056..1.207 rows=6154 loops=1)
+                                                          Sort Key: movie_ratings_1.movie_avg DESC
+                                                          Sort Method: quicksort  Memory: 529kB
+                                                          ->  CTE Scan on movie_ratings movie_ratings_1  (cost=0.00..4.00 rows=200 width=40) (actual time=0.001..0.259 rows=6154 loops=1)
+  CTE filtered_views
+    ->  Subquery Scan on done_1  (cost=35.93..35.96 rows=1 width=16) (actual time=3.921..3.922 rows=1 loops=1)
+          ->  Limit  (cost=35.93..35.95 rows=1 width=24) (actual time=3.921..3.921 rows=1 loops=1)
+                ->  WindowAgg  (cost=35.93..39.43 rows=200 width=24) (actual time=3.921..3.921 rows=1 loops=1)
+                      ->  Sort  (cost=35.93..36.43 rows=200 width=24) (actual time=3.918..3.918 rows=2 loops=1)
+                            Sort Key: m_1.rank
+                            Sort Method: quicksort  Memory: 601kB
+                            ->  WindowAgg  (cost=24.79..28.29 rows=200 width=24) (actual time=2.346..3.383 rows=6535 loops=1)
+                                  ->  Sort  (cost=24.79..25.29 rows=200 width=16) (actual time=2.344..2.482 rows=6535 loops=1)
+                                        Sort Key: m_1.rank DESC
+                                        Sort Method: quicksort  Memory: 550kB
+                                        ->  Subquery Scan on m_1  (cost=11.64..17.14 rows=200 width=16) (actual time=0.615..1.861 rows=6535 loops=1)
+                                              ->  WindowAgg  (cost=11.64..15.14 rows=200 width=24) (actual time=0.615..1.592 rows=6535 loops=1)
+                                                    ->  Sort  (cost=11.64..12.14 rows=200 width=16) (actual time=0.613..0.795 rows=6535 loops=1)
+                                                          Sort Key: movie_views_1.views DESC
+                                                          Sort Method: quicksort  Memory: 550kB
+                                                          ->  CTE Scan on movie_views movie_views_1  (cost=0.00..4.00 rows=200 width=16) (actual time=0.001..0.254 rows=6535 loops=1)
+  InitPlan 6 (returns $5)
+    ->  CTE Scan on filtered_ratings  (cost=0.00..0.02 rows=1 width=8) (actual time=4.341..4.341 rows=1 loops=1)
+  InitPlan 7 (returns $6)
+    ->  CTE Scan on filtered_ratings filtered_ratings_1  (cost=0.00..0.02 rows=1 width=8) (actual time=0.000..0.000 rows=1 loops=1)
+  InitPlan 8 (returns $7)
+    ->  CTE Scan on filtered_views  (cost=0.00..0.02 rows=1 width=8) (actual time=3.922..3.922 rows=1 loops=1)
+  InitPlan 9 (returns $8)
+    ->  CTE Scan on filtered_views filtered_views_1  (cost=0.00..0.02 rows=1 width=8) (actual time=0.000..0.000 rows=1 loops=1)
+  ->  Hash Left Join  (cost=3723.23..4364.99 rows=6570 width=56) (actual time=98.398..100.331 rows=6589 loops=1)
+        Hash Cond: (movie_in_genre.movie_id = movie_likeness.movie_id)
+        ->  Hash Left Join  (cost=13.00..637.15 rows=6570 width=48) (actual time=81.516..82.992 rows=6589 loops=1)
+              Hash Cond: (movie_in_genre.movie_id = movie_ratings.movie_id)
+              ->  Hash Left Join  (cost=6.50..384.28 rows=6570 width=16) (actual time=62.227..63.096 rows=6589 loops=1)
+                    Hash Cond: (movie_in_genre.movie_id = movie_views.movie_id)
+                    ->  CTE Scan on movie_in_genre  (cost=0.00..131.40 rows=6570 width=8) (actual time=17.344..17.580 rows=6589 loops=1)
+                    ->  Hash  (cost=4.00..4.00 rows=200 width=16) (actual time=44.862..44.862 rows=6535 loops=1)
+                          Buckets: 8192 (originally 1024)  Batches: 1 (originally 1)  Memory Usage: 371kB
+                          ->  CTE Scan on movie_views  (cost=0.00..4.00 rows=200 width=16) (actual time=43.434..44.499 rows=6535 loops=1)
+              ->  Hash  (cost=4.00..4.00 rows=200 width=40) (actual time=19.283..19.284 rows=6154 loops=1)
+                    Buckets: 8192 (originally 1024)  Batches: 1 (originally 1)  Memory Usage: 353kB
+                    ->  CTE Scan on movie_ratings  (cost=0.00..4.00 rows=200 width=40) (actual time=17.390..18.931 rows=6154 loops=1)
+        ->  Hash  (cost=3707.73..3707.73 rows=200 width=24) (actual time=16.877..16.878 rows=5896 loops=1)
+              Buckets: 8192 (originally 1024)  Batches: 1 (originally 1)  Memory Usage: 387kB
+              ->  Subquery Scan on movie_likeness  (cost=3703.73..3707.73 rows=200 width=24) (actual time=16.042..16.554 rows=5896 loops=1)
+                    ->  HashAggregate  (cost=3703.73..3705.73 rows=200 width=24) (actual time=16.041..16.341 rows=5896 loops=1)
+                          Group Key: movie_in_genre_1.movie_id
+                          Batches: 1  Memory Usage: 993kB
+                          ->  Hash Join  (cost=3057.49..3560.52 rows=19095 width=9) (actual time=12.903..14.798 rows=14519 loops=1)
+                                Hash Cond: (movie_in_genre_1.movie_id = liked_movies.movie_id)
+                                ->  CTE Scan on movie_in_genre movie_in_genre_1  (cost=0.00..131.40 rows=6570 width=8) (actual time=0.000..0.232 rows=6589 loops=1)
+                                ->  Hash  (cost=1818.33..1818.33 rows=99133 width=9) (actual time=12.783..12.783 rows=99134 loops=1)
+                                      Buckets: 131072  Batches: 1  Memory Usage: 5671kB
+                                      ->  Seq Scan on liked_movies  (cost=0.00..1818.33 rows=99133 width=9) (actual time=0.015..7.142 rows=99134 loops=1)
+Planning Time: 1.992 ms
+Execution Time: 109.920 ms
+```
+
+### Explanation
+Essentially, the query planner is trying to aggregate values from multiple CTE expressions. The planner scans through all the CTEs to obtain the pieces of information it needs and the CTEs themselves are formed from a series of hash joins (makes up most of the execution time) and sequential scans on the other CTEs. Withe few base CTEs made up of index scans or bitmaps
