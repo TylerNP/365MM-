@@ -1,5 +1,5 @@
 # Fake Data Modeling
-### ADD LINK TO populate_data/fake_data.py
+### populate_data/fake_data.py [Code Block](https://github.com/TylerNP/365MM-/blob/tylerp/populate_data/fake_data.py)
 
 #### Cast Members
 First we created 1000 fake cast members. We approximated 1000 cast members specifically, since on average actors typically act in about 50 movies in their career, this would approximately map out to the approximately 45,000 movies we had. From this, we also generated about 50,000 role entries to map actors to their respecitve movies. 
