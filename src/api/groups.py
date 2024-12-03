@@ -148,9 +148,10 @@ def remove_from_group(group_id : int, user_id : int):
         sql_to_execute = "DELETE FROM groups_joined WHERE group_id = :group_id AND user_id = :user_id"
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
         sql_to_execute = "SELECT user_id FROM groups_joined WHERE group_id = :group_id ORDER BY created_at DESC LIMIT 1"
-        user_id = list(connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id})).scalar_one()
+        try:
+            user_id = connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id}).scalar_one()
         # check if there is another user and make that person the new owner 
-        if user_id:
+        except sqlalchemy.exc.NoResultFound:
             sql_to_execute = "UPDATE groups_joined SET role = 'Owner' WHERE groups_joined.user_id = :user_id"
             connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
 

@@ -107,7 +107,7 @@ def get_movie_available(name : str):
                             movies.name, 
                             movies.release_date,
                             movies.description,
-                            movies.average_rating,
+                            COALESCE(movies.average_rating, 0) AS average_rating,
                             movies.budget,
                             movies.box_office, 
                             movies.duration 
@@ -127,7 +127,7 @@ def get_movie_available(name : str):
     return movies
 
 @router.get("/random/user/{user_id}")
-def get_movie_interested(user_id : int):
+def get_random_movie_interested(user_id : int):
     """
     Gets a random movie that a user has not watched, empty if no movies available
     """

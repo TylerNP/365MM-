@@ -26,7 +26,7 @@ def get_prediction(movie_id : int):
         if not prediction:
             raise HTTPException(status_code=404, detail="No prediction found, prediction must first be generated")
     end_time = time.time()
-    print(f"Took {round(end_time-start_time,4)} ms")
+    print(f"Took {round(end_time-start_time,4)} s")
     return prediction
 
 @router.post("/generate/{movie_id}")
@@ -166,7 +166,7 @@ def create_prediction(movie_id : int):
         connection.execute(sqlalchemy.text(sql_insert), prediction)
 
     end_time = time.time()
-    print(f"Took {round(end_time-start_time,4)} ms")
+    print(f"Took {round(end_time-start_time,4)} s")
     return HTTPException(status_code=201, detail="Prediction Created")
 
 def normalize_vector(vector : list[int]) -> list[int]:
