@@ -24,24 +24,105 @@ With this in mind, we get around 50,000 rows from cast, 30,000 from streaming se
 ## Analytics
 
 ### Get_Movie_Analytics
-1. 0.0335 ms
+1. 0.0335 s
 2. 
 ### Get_Genre_Analytics
-1. 0.0944 ms 
+1. 0.0944 s
 2. 
 ### Get_Most_Popular
-1. 0.1592 ms 0.1559 ms 0.1497 ms 
+1. 0.1592 s 0.1559 s 0.1497 s 
 2. 
-## Admin
-
-## Catalog
-
-## Movies
-
-## Predictions
-
-## Recommendations
 
 ## Users
 
+### User_Signup
+1. 0.0053 s
+
+### User_Login
+1. 0.0051 s
+
+### User_Add_movie
+1. 0.0108 s
+
+### User_list
+1. 0.0397 s
+
+### User_Rate_Movie
+1. 0.0138 s
+
+### User_Watched_Movie
+1. 0.0127 s
+
+### User_Like_Movie
+1. 0.0114 s
+
+### Remove_User
+1. 0.0317 s
+
+## Catalog
+
+### Search
+1. 0.0423 s 
+
+## Groups
+
+### Get_Group_Info
+1. 0.0071 s
+
+### Create_Group
+1. 0.0186 s
+
+### Join_Group
+1. 0.0207 s
+
+### Remove_From_Group
+1. 0.0166 s
+
+### Delete_Group
+1. 0.0188 s
+
+### List_Groups
+1. 0.0445 s 
+
+## Analytics 
+
+### Get_Movie_Analytics
+1. 0.0384 s
+
+### Get_Genre_Analytics
+1. 0.1098 s
+
+## Movies
+
+### Get_Movie
+1. 0.0078 s
+
+### New_movie
+1. 0.0126 s
+
+### Get_Movies_Available
+1. 0.0313 s
+
+### Get_Random_Movie_Interested
+1. 0.0258 s
+
+## Admin
+
+### Delete_Movie
+1. 0.0337 s
+
+### Delete_Group
+1. 0.0155 s
+
+## Predictions
+
+### Get_Prediction
+1. 0.0047 s
+
+### Create_Prediction
+1. 0.3141 s
+
+## Recommendations
+### Get_Recommended
+1. 200.8101 s
 # Performance Tuning

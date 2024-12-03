@@ -72,7 +72,7 @@ def get_movie_analytics(movie_id : int):
             liked = result.liked
             disliked = result.disliked
     end_time = time.time()
-    print(f"Took {round(end_time-start_time,4)} ms")
+    print(f"Took {round(end_time-start_time,4)} s")
     return {
         "views": views,
         "rated": rated,
@@ -244,7 +244,7 @@ def get_genre_analytics(genre : str):
             "movie_ids": movie_ids
         }
     end_time = time.time()
-    print(f"Took {round(end_time-start_time,4)} ms")
+    print(f"Took {round(end_time-start_time,4)} s")
     return genre
 
 class SearchOptions(str, Enum):
@@ -359,5 +359,5 @@ def get_most_popular(sort_option: SearchOptions = SearchOptions.views):
             }
         )
     end_time = time.time()
-    print(f"Took {round(end_time-start_time, 4)} ms")
+    print(f"Took {round(end_time-start_time, 4)} s")
     return movies

@@ -177,7 +177,7 @@ def get_recommended(user_id: int):
 
         # map the recommended movies into proper format
         end_time = time.time()
-        print(f"Took {round(end_time-start_time,4)} ms")
+        print(f"Took {round(end_time-start_time,4)} s")
         return (list(map(format_movie_with_agg, recommended_movies)) + to_append)
 
 """

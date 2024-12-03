@@ -121,7 +121,7 @@ async def search_movies(
     next = f"/catalog/search?search_page={search_page + 1}" if len(movies) == limit else ""
 
     end_time = time.time()
-    print(f"Took {round(end_time-start_time,4)} ms")
+    print(f"Took {round(end_time-start_time,4)} s")
     return {
         "previous": previous,
         "next": next,
