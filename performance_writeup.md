@@ -125,4 +125,22 @@ With this in mind, we get around 50,000 rows from cast, 30,000 from streaming se
 ## Recommendations
 ### Get_Recommended
 1. 200.8101 s
+
 # Performance Tuning
+Top 3 Slowest Endpoints:
+    - Get_recommended (200.8101s)
+    - Create_Prediction (0.3141s)
+    - Get_Genre_Analytics (0.1098s)
+
+## Get_Recommended
+
+### First Query
+```
+EXPLAIN
+SELECT 
+    user_id, movie_id, rating 
+FROM 
+    ratings 
+ORDER BY 
+    user_id, rating  
+```
