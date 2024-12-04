@@ -34,7 +34,7 @@ def get_movie(movie_id : int):
     movie = {}
     result = None
     with db.engine.begin() as connection:
-        sql_to_execute = "SELECT :movie_id AS id, name, release_date, description, COALESCE(average_rating, 0) AS average_rating, budget, box_office, duration FROM movies WHERE id = :movie_id"
+        sql_to_execute = "SELECT :movie_id AS id, name, release_date, COALESCE(movies.description, '') AS description, COALESCE(average_rating, 0) AS average_rating, budget, box_office, duration FROM movies WHERE id = :movie_id"
         result = connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
         movie = format_movies(result)
         if not movie:
@@ -106,7 +106,7 @@ def get_movie_available(name : str):
                             movies.id, 
                             movies.name, 
                             movies.release_date,
-                            movies.description,
+                            COALESCE(movies.description, '') AS description,
                             COALESCE(movies.average_rating, 0) AS average_rating,
                             movies.budget,
                             movies.box_office, 
@@ -145,7 +145,7 @@ def get_random_movie_interested(user_id : int):
                 movies.id, 
                 movies.name, 
                 movies.release_date,
-                movies.description,
+                COALESCE(movies.description, '') AS description,
                 COALESCE(movies.average_rating, 0) AS average_rating,
                 movies.budget,
                 movies.box_office, 

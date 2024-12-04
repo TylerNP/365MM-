@@ -99,8 +99,8 @@ def user_list(user_id : int):
                     movies.id, 
                     movies.name, 
                     movies.release_date,
-                    movies.description,
-                    movies.average_rating,
+                    COALESCE(movies.description, '') AS description,
+                    COALESCE(movies.average_rating, 0) AS average_rating,
                     movies.budget,
                     movies.box_office, 
                     movies.duration 
