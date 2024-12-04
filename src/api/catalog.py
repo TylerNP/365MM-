@@ -89,12 +89,12 @@ async def search_movies(
     if director:
         stmt = stmt.join(db.roles, db.movies.c.id == db.roles.c.movie_id) \
                    .join(db.cast_and_crew, db.roles.c.cast_id == db.cast_and_crew.c.id) \
-                   .where(db.roles.c.role == "director") \
+                   .where(db.roles.c.role == "Director") \
                    .where(db.cast_and_crew.c.lastname.ilike(f"%{director}%"))
     if actor:
         stmt = stmt.join(db.roles, db.movies.c.id == db.roles.c.movie_id) \
                    .join(db.cast_and_crew, db.roles.c.cast_id == db.cast_and_crew.c.id) \
-                   .where(db.roles.c.role == "actor") \
+                   .where(db.roles.c.role == "Actor") \
                    .where(db.cast_and_crew.c.lastname.ilike(f"%{actor}%"))
     if year:
         stmt = stmt.where(sqlalchemy.extract('year', db.movies.c.release_date) == year)
