@@ -94,6 +94,19 @@ Get movies you haven't watched yet but have shown intrest in <br />
 ]
 ```
 
+### 1.5 Get Streaming Services `/movies/streaming_services/` (GET)
+
+**Response**:
+```json
+[
+  {
+    "service_id": "integer",
+    "name": "string",
+    "amt_in_collection": "integer"
+  }
+]
+```
+
 ## 2. Users
 ### 2.1 User Signup - `/users/signup/` (POST)
 Create new user. <br />

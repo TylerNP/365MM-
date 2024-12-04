@@ -107,6 +107,9 @@ With this in mind, we get around 50,000 rows from cast, 30,000 from streaming se
 ### Get_Random_Movie_Interested
 1. 0.0258 s
 
+### Get_Streaming_Services
+1. 0.0171 s
+
 ## Admin
 
 ### Delete_Movie

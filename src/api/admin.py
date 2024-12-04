@@ -23,7 +23,7 @@ def delete_movie(user_id : int, movie_id : int):
         sql_to_execute = "DELETE FROM movies WHERE id = :movie_id"
         connection.execute(sqlalchemy.text(sql_to_execute), {"movie_id":movie_id})
     end_time = time.time()
-    print(f"Took {round(end_time-start_time, 4)} ms")
+    print(f"Took {round(end_time-start_time, 4)} s")
     return {"success": True}
 
 @router.post("/{user_id}/group/delete/{group_id}")
@@ -38,5 +38,5 @@ def delete_group(user_id : int, group_id : int):
         sql_to_execute = "DELETE FROM groups WHERE id = :group_id"
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id": group_id})
     end_time = time.time()
-    print(f"Took {round(end_time-start_time, 4)} ms")
+    print(f"Took {round(end_time-start_time, 4)} s")
     return {"success": True}

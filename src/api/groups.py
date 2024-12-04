@@ -64,7 +64,7 @@ def get_group_info(group_id : int):
         group["description"] = row.description
         group["interests"] = row.interests if row.interests[0] != None else ["N/A"]
     end_time = time.time()
-    print(f"Took {round(end_time-start_time,4)} ms")
+    print(f"Took {round(end_time-start_time,4)} s")
     return group
 
 @router.post("/new/{user_id}")
@@ -103,7 +103,7 @@ def create_group(group : new_group, user_id : int):
         sql_to_execute = "INSERT INTO groups_joined (user_id, group_id, role) VALUES (:user_id, :group_id, 'Owner')"
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
     end_time = time.time()
-    print(f"Took {round(end_time-start_time,4)} ms")
+    print(f"Took {round(end_time-start_time,4)} s")
     return {"group_id":group_id}
 
 @router.post("/{group_id}/join/{user_id}")
@@ -130,7 +130,7 @@ def join_group(group_id : int, user_id : int):
         except sqlalchemy.exc.IntegrityError:
             raise HTTPException(status_code=409, detail="user already a member of this group")
     end_time = time.time()
-    print(f"Took {round(end_time-start_time,4)} ms")
+    print(f"Took {round(end_time-start_time,4)} s")
     return HTTPException(status_code=201, detail="Joined Group")
 
 @router.delete("/{group_id}/user/{user_id}")
@@ -156,7 +156,7 @@ def remove_from_group(group_id : int, user_id : int):
             connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id, "user_id":user_id})
 
     end_time = time.time()
-    print(f"Took {round(end_time-start_time,4)} ms")
+    print(f"Took {round(end_time-start_time,4)} s")
     return HTTPException(status_code=200, detail="Removed user")
 
 @router.delete("/{group_id}/")
@@ -180,7 +180,7 @@ def delete_group(group_id : int, user_id : int):
         sql_to_execute = "DELETE FROM groups WHERE groups.id = :group_id"
         connection.execute(sqlalchemy.text(sql_to_execute), {"group_id":group_id})
     end_time = time.time()
-    print(f"Took {round(end_time-start_time,4)} ms")
+    print(f"Took {round(end_time-start_time,4)} s")
     return HTTPException(status_code=200, detail="Removed group")
 
 @router.get("/list/")
@@ -247,5 +247,5 @@ def list_groups(search_page: int = 1, limit: int = 10):
         ]
     
     end_time = time.time()
-    print(f"Took {round(end_time-start_time,4)} ms")
+    print(f"Took {round(end_time-start_time,4)} s")
     return groups

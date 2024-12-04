@@ -41,7 +41,7 @@ def get_movie(movie_id : int):
             raise HTTPException(status_code=404, detail="No movie found")
     print(movie)
     end_time = time.time()
-    print(f"Took {round(end_time-start_time,4)} ms")
+    print(f"Took {round(end_time-start_time,4)} s")
     return movie[-1]
 
 @router.post("/new/")
@@ -89,7 +89,7 @@ def new_movie(new_movie : Movie):
             raise HTTPException(status_code=409, detail="Movie already exists")
     
     end_time = time.time()
-    print(f"Took {round(end_time-start_time,4)} ms")
+    print(f"Took {round(end_time-start_time,4)} s")
     return {
         "movie_id":movie_id
     }
@@ -123,7 +123,7 @@ def get_movie_available(name : str):
         movies = format_movies(movies_available)
 
     end_time = time.time()
-    print(f"Took {round(end_time-start_time,4)} ms")
+    print(f"Took {round(end_time-start_time,4)} s")
     return movies
 
 @router.get("/random/user/{user_id}")
@@ -168,6 +168,35 @@ def get_random_movie_interested(user_id : int):
         print(movie)
 
     end_time = time.time()
-    print(f"Took {round(end_time-start_time,4)} ms")
+    print(f"Took {round(end_time-start_time,4)} s")
     return movie
 
+@router.get('/streaming_services/')
+def get_streaming_services():
+    start_time = time.time()
+    with db.engine.begin() as connection:
+        sql_to_execute = """
+            SELECT 
+                streaming_services.id, 
+                streaming_services.name, 
+                COALESCE(COUNT(1), 0) AS movies_count 
+            FROM 
+                streaming_services 
+            JOIN 
+                available_streaming ON streaming_services.id = available_streaming.service_id 
+            GROUP BY 
+                streaming_services.id
+            ORDER BY
+                movies_count DESC
+            """
+        results = connection.execute(sqlalchemy.text(sql_to_execute))
+        services = [
+            {
+                "service_id": result.id,
+                "name": result.name,
+                "amt_in_collection": result.movies_count
+            } for result in results
+        ]
+    end_time = time.time()
+    print(f"Took {round(end_time-start_time,4)} s")
+    return services
